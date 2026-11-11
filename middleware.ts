@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 
 const OWNER_EMAIL = 'vendrahub@hotmail.com';
@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
