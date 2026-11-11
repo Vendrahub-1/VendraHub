@@ -2,12 +2,11 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const params = useSearchParams();
   const [email, setEmail] = useState('VendraHub@hotmail.com');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,8 +38,6 @@ export default function AdminLoginPage() {
     <Link href="/" className="auth-back">← VendraHub storefront</Link>
     <p className="auth-kicker">PRIVATE OWNER ACCESS</p><h1>Admin sign in</h1>
     <p className="auth-description">Only the verified owner account can enter the administration workspace. Authenticator verification is required.</p>
-    {params.get('error') === 'configuration' && <p className="auth-error">Supabase configuration is missing. Add the required GitHub Actions variables and runtime environment values.</p>}
-    {params.get('error') === 'not_authorised' && <p className="auth-error">This account is not authorised for owner administration.</p>}
     {error && <p className="auth-error" role="alert">{error}</p>}
     <form onSubmit={submit} className="auth-form">
       <label htmlFor="owner-email">Owner email</label><input id="owner-email" type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required />
