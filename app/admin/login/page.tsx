@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
         throw new Error('This account is not the verified VendraHub owner account.');
       }
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      router.replace(level.currentLevel === 'aal2' ? '/admin' : '/admin/mfa');
+      router.replace(level?.currentLevel === 'aal2' ? '/admin' : '/admin/mfa');
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to sign in.');
