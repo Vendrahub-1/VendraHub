@@ -30,7 +30,7 @@ export default async function AdminPage() {
     supabase.from('audit_events').select('id', { count: 'exact', head: true }),
     supabase.from('supplier_connections').select('supplier_code, connection_status').order('supplier_code'),
   ]);
-  const supplierStatuses = new Map((supplierResult.data ?? []).map(item => [item.supplier_code, item.connection_status]));
+  const supplierStatuses = new Map<string, string>((supplierResult.data ?? []).map(item => [item.supplier_code, item.connection_status] as [string, string]));
   const supplierCount = supplierResult.data?.length ?? 0;
   return (
     <main className="admin-layout">
