@@ -29,7 +29,7 @@ export default function AdminMfaPage() {
           return;
         }
         const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (level.currentLevel === 'aal2') { router.replace('/admin'); return; }
+        if (level?.currentLevel === 'aal2') { router.replace('/admin'); return; }
         const { data, error: listError } = await supabase.auth.mfa.listFactors();
         if (listError) throw listError;
         const verified = data.totp.find(item => item.status === 'verified');
@@ -68,7 +68,7 @@ export default function AdminMfaPage() {
       const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId, code: code.replace(/\s/g, '') });
       if (verifyError) throw verifyError;
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (level.currentLevel !== 'aal2') throw new Error('Authenticator verification did not establish AAL2.');
+      if (level?.currentLevel !== 'aal2') throw new Error('Authenticator verification did not establish AAL2.');
       router.replace('/admin'); router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Authenticator verification failed.');
