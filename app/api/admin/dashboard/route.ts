@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Owner access only.' }, { status: 403 });
   }
   const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assurance.currentLevel !== 'aal2') {
+  if (assurance?.currentLevel !== 'aal2') {
     return NextResponse.json({ error: 'Authenticator verification required.' }, { status: 403 });
   }
 
