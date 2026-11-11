@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
   const isCustomerPrivate = pathname.startsWith('/customer/account') || pathname.startsWith('/api/customer');
 
   if (!url || !key) {
-    if (isAdminRoute && !isAdminLogin) {
+    if ((isAdminRoute && !isAdminLogin) || isCustomerPrivate) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication service is not configured.' }, { status: 503 });
       return NextResponse.redirect(new URL('/admin/login?error=configuration', request.url));
     }
