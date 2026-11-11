@@ -37,7 +37,7 @@ export default function AdminMfaPage() {
           if (active) { setFactor(verified); setFactorId(verified.id); }
           return;
         }
-        const unverified = data.totp.find(item => item.status === 'unverified');
+        const unverified = data.totp.find(item => (item.status as string) === 'unverified');
         if (unverified) {
           if (active) setMessage('There is an unfinished authenticator setup. Contact the project owner to safely clear only the unverified setup before enrolling again.');
           return;
