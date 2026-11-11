@@ -13,7 +13,7 @@ const dashboardCards = [
     href: '/customer',
     accent: 'customer',
   },
-];
+] as const;
 
 export default function HomePage() {
   return (
@@ -22,8 +22,8 @@ export default function HomePage() {
         <div className="eyebrow">VendraHub</div>
         <h1>Modern commerce sessions for admins and customers.</h1>
         <p>
-          A complete starter foundation for the VendraHub storefront and control center, including a web app
-          foundation, Android-capable packaging, and isolated admin/customer session flows.
+          A commerce foundation for the VendraHub storefront and control center,
+          with separate admin and customer routes and Android-capable packaging.
         </p>
         <div className="hero-actions">
           <Link href="/admin" className="primary-button">Open admin</Link>
