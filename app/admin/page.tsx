@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
+import { createClient } from '@/lib/supabase/server';
 
 const suppliers = [
   { name: 'Syncee', method: 'Shopify app authorisation', status: 'Awaiting authorisation', detail: 'Install Syncee from Shopify Admin and complete its merchant-authorised connection.', url: 'https://admin.shopify.com/store/vendrahub-store/apps', docs: 'https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store' },
@@ -22,7 +23,15 @@ function EmptyState({ title, detail }: { title: string; detail: string }) {
   return <div className="admin-empty"><span className="empty-mark">—</span><strong>{title}</strong><p>{detail}</p></div>;
 }
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const supabase = await createClient();
+  const [ticketsResult, auditResult, supplierResult] = await Promise.all([
+    supabase.from('support_tickets').select('id', { count: 'exact', head: true }),
+    supabase.from('audit_events').select('id', { count: 'exact', head: true }),
+    supabase.from('supplier_connections').select('supplier_code, connection_status').order('supplier_code'),
+  ]);
+  const supplierStatuses = new Map((supplierResult.data ?? []).map(item => [item.supplier_code, item.connection_status]));
+  const supplierCount = supplierResult.data?.length ?? 0;
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
@@ -42,7 +51,12 @@ export default function AdminPage() {
           <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Protected owner workspace — operational integrations remain read-only</strong><p>Only the verified owner session with authenticator-based MFA can access this console. Supplier purchases, imports, live inventory changes, payments and fulfilment actions remain disabled.</p></div></div>
 
           <div className="admin-metrics">
-            {['Total sales', 'Orders', 'Products', 'Estimated profit'].map(label => <article className="metric-card" key={label}><span>{label}</span><strong>—</strong><small>Awaiting verified data connection</small></article>)}
+            {[
+              { label: 'Support requests', value: String(ticketsResult.count ?? 0), note: 'Customer tickets in Supabase' },
+              { label: 'Supplier records', value: String(supplierCount), note: 'Connection state only; not connected' },
+              { label: 'Audit events', value: String(auditResult.count ?? 0), note: 'Recorded privileged events' },
+              { label: 'Live operations', value: 'Paused', note: 'Purchases, imports and payments disabled' },
+            ].map(metric => <article className="metric-card" key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.note}</small></article>)}
           </div>
 
           <div className="overview-grid">
@@ -63,7 +77,7 @@ export default function AdminPage() {
           </Section>
 
           <Section id="suppliers" title="Supplier connections" description="Compare suppliers, inspect connection health and review sourcing options.">
-            <div className="supplier-grid">{suppliers.map(s => <article className="admin-card supplier-card" key={s.name}><div className="supplier-title"><div><h3>{s.name}</h3><small>{s.method}</small></div><span className={s.status.includes('present') ? 'state state-warning' : 'state'}>{s.status}</span></div><p>{s.detail}</p><div className="supplier-links"><a href={s.url} target="_blank" rel="noreferrer">Open connection page ↗</a><a href={s.docs} target="_blank" rel="noreferrer">Official guide ↗</a></div></article>)}</div>
+            <div className="supplier-grid">{suppliers.map(s => { const code = s.name === 'CJdropshipping' ? 'cjdropshipping' : s.name.toLowerCase(); const currentStatus = supplierStatuses.get(code) ?? 'not_connected'; return <article className="admin-card supplier-card" key={s.name}><div className="supplier-title"><div><h3>{s.name}</h3><small>{s.method}</small></div><span className="state">{currentStatus.replaceAll('_', ' ')}</span></div><p>{s.detail}</p><div className="supplier-links"><a href={s.url} target="_blank" rel="noreferrer">Open connection page ↗</a><a href={s.docs} target="_blank" rel="noreferrer">Official guide ↗</a></div></article>; })}</div>
             <div className="admin-note"><strong>Supplier operating policy</strong><p>Compare all three before selecting a primary supplier. Product imports, paid plans, supplier purchases, live stock changes and supplier order submission remain disabled until separately approved.</p></div>
           </Section>
 
@@ -84,7 +98,7 @@ export default function AdminPage() {
           </Section>
 
           <Section id="staff" title="Staff & access" description="Administrator identity, staff roles, permissions and audit history.">
-            <div className="admin-card"><EmptyState title="Access management not configured" detail="Production use requires server-enforced authentication, role-based permissions, MFA and audit logging." /></div>
+            <div className="admin-card"><EmptyState title="Owner access protected" detail="Owner access is checked server-side; verified email and AAL2 MFA are required. Staff roles remain disabled until explicitly configured." /></div>
           </Section>
 
           <Section id="notifications" title="Notifications" description="Order events, supplier errors, stock alerts, payment events and security notices.">
