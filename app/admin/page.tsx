@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SignOutButton from '@/components/sign-out-button';
 
 const suppliers = [
   { name: 'Syncee', method: 'Shopify app authorisation', status: 'Awaiting authorisation', detail: 'Install Syncee from Shopify Admin and complete its merchant-authorised connection.', url: 'https://admin.shopify.com/store/vendrahub-store/apps', docs: 'https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store' },
@@ -30,15 +31,15 @@ export default function AdminPage() {
         <nav aria-label="Admin navigation" className="admin-nav">
           {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
-        <div className="sidebar-bottom"><span className="status-dot" /> Preview environment <small>Not production authenticated</small><Link href="/">← Store home</Link></div>
+        <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small><Link href="/">← Store home</Link></div>
       </aside>
 
       <div className="admin-main">
-        <header className="admin-topbar"><div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>Store control center</strong></div><div className="topbar-actions"><span className="preview-chip">PREVIEW MODE</span><a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a></div></header>
+        <header className="admin-topbar"><div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>Store control center</strong></div><div className="topbar-actions"><span className="preview-chip">OWNER WORKSPACE</span><SignOutButton /><a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a></div></header>
         <div className="admin-content">
           <section id="overview" className="admin-welcome"><div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Good day. <span>Here is your store overview.</span></h1><p>Your administration workspace. Live business figures will appear when authenticated data services are connected.</p></div><div className="welcome-date">VENDRAHUB<br/><strong>ADMINISTRATION</strong></div></section>
 
-          <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Development preview — production access is not enabled</strong><p>This interface is not yet protected by administrator authentication. Do not use it to manage live customer or order data.</p></div></div>
+          <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Protected owner workspace — operational integrations remain read-only</strong><p>Only the verified owner session with authenticator-based MFA can access this console. Supplier purchases, imports, live inventory changes, payments and fulfilment actions remain disabled.</p></div></div>
 
           <div className="admin-metrics">
             {['Total sales', 'Orders', 'Products', 'Estimated profit'].map(label => <article className="metric-card" key={label}><span>{label}</span><strong>—</strong><small>Awaiting verified data connection</small></article>)}
@@ -46,7 +47,7 @@ export default function AdminPage() {
 
           <div className="overview-grid">
             <article className="admin-card"><div className="card-heading"><div><h3>Business activity</h3><p>Sales and order activity will display here</p></div><span className="muted-tag">NO DATA</span></div><EmptyState title="Analytics not connected" detail="Connect authenticated Shopify and reporting services to populate this area." /></article>
-            <article className="admin-card"><div className="card-heading"><div><h3>Launch readiness</h3><p>Current implementation checkpoints</p></div></div><ul className="readiness-list"><li><span>Admin authentication</span><b className="state state-warning">Required</b></li><li><span>Database and access policies</span><b className="state state-warning">Required</b></li><li><span>Shopify Admin API</span><b className="state">Not verified</b></li><li><span>Supplier connections</span><b className="state">Pending</b></li><li><span>Live operations</span><b className="state state-paused">Disabled</b></li></ul></article>
+            <article className="admin-card"><div className="card-heading"><div><h3>Launch readiness</h3><p>Current implementation checkpoints</p></div></div><ul className="readiness-list"><li><span>Admin authentication</span><b className="state state-warning">Owner MFA enforced</b></li><li><span>Database and access policies</span><b className="state state-warning">RLS enabled</b></li><li><span>Shopify Admin API</span><b className="state">Not verified</b></li><li><span>Supplier connections</span><b className="state">Pending</b></li><li><span>Live operations</span><b className="state state-paused">Disabled</b></li></ul></article>
           </div>
 
           <Section id="products" title="Products" description="Catalogue, variants, pricing, product approval and publication.">
