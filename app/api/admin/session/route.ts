@@ -11,8 +11,8 @@ export async function GET() {
     return NextResponse.json({ authenticated: false }, { status: 403 });
   }
   const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (level.currentLevel !== 'aal2') return NextResponse.json({ authenticated: false, mfaRequired: true }, { status: 403 });
-  return NextResponse.json({ authenticated: true, email: user.email, assuranceLevel: level.currentLevel }, {
+  if (level?.currentLevel !== 'aal2') return NextResponse.json({ authenticated: false, mfaRequired: true }, { status: 403 });
+  return NextResponse.json({ authenticated: true, email: user.email, assuranceLevel: level?.currentLevel ?? null }, {
     headers: { 'Cache-Control': 'private, no-store' },
   });
 }
