@@ -1,0 +1,291 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f7fb;
+  color: #101828;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.page-shell,
+.session-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.hero-panel,
+.panel,
+.info-card,
+.stat-card {
+  background: #ffffff;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 8px 30px rgba(16, 24, 40, 0.05);
+}
+
+.hero-panel {
+  padding: 40px 32px;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+  color: #5d6b82;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 4vw, 4rem);
+  line-height: 1.1;
+  margin: 0 0 16px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
+  color: #475467;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: #101828;
+  color: #ffffff;
+}
+
+.secondary-button {
+  background: #eef4ff;
+  color: #0f172a;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.two-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.info-card {
+  padding: 28px 24px;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+}
+
+.info-card.admin {
+  border-top: 4px solid #0f172a;
+}
+
+.info-card.customer {
+  border-top: 4px solid #2d7ff9;
+}
+
+.card-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #667085;
+  margin-bottom: 12px;
+}
+
+.card-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.crumb-link {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.session-pill {
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.intro-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.stats-grid.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stat-card {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-card span {
+  color: #667085;
+  font-size: 0.9rem;
+}
+
+.stat-card strong {
+  font-size: clamp(1.3rem, 2vw, 2rem);
+}
+
+.positive {
+  color: #0f9d58;
+}
+
+.neutral {
+  color: #101828;
+}
+
+.warning {
+  color: #d97706;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+}
+
+.panel {
+  padding: 24px;
+}
+
+.table-list,
+.stack-list,
+.product-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.table-list li,
+.product-list li {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf2f7;
+  align-items: center;
+}
+
+.product-list li {
+  grid-template-columns: 1.4fr auto;
+}
+
+.product-list li div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-list li span,
+.stack-list li,
+.table-list li span {
+  color: #475467;
+}
+
+.stack-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.admin-theme .panel,
+.admin-theme .stat-card,
+.admin-theme .hero-panel,
+.admin-theme .info-card {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.customer-theme .panel,
+.customer-theme .stat-card,
+.customer-theme .hero-panel,
+.customer-theme .info-card {
+  border-color: rgba(45, 127, 249, 0.08);
+}
+
+@media (max-width: 900px) {
+  .two-up,
+  .stats-grid,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-panel,
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
