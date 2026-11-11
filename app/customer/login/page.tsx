@@ -22,7 +22,7 @@ export default function CustomerLoginPage() {
       if (mode === 'signup') {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: { data: { full_name: name.trim() }, emailRedirectTo: `${window.location.origin}/customer/account` },
+          options: { data: { full_name: name.trim() }, emailRedirectTo: `${window.location.origin}/auth/callback?next=/customer/account` },
         });
         if (signUpError) throw signUpError;
         if (data.session) { router.replace('/customer/account'); router.refresh(); }
