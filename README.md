@@ -1,49 +1,40 @@
 # VendraHub
 
-VendraHub is an online store and commerce workspace starter. This repository now includes a basic Next.js app foundation with isolated admin and customer session experiences, plus Android packaging support for building an APK workflow.
+VendraHub is a Next.js commerce starter with separate admin and customer experience routes, plus a Capacitor Android packaging scaffold.
 
-## Included
+## Shopify storefront connection
 
-- Next.js storefront shell for the VendraHub web app
-- Admin session route with analytics and order overview
-- Customer session route with storefront and wallet summary
-- Capacitor configuration for Android app packaging
-- Production-friendly project structure and starter docs
+The customer page reads up to 20 products from the Shopify Storefront GraphQL API. It is read-only: it does not create orders, change inventory, or access customer records. The private Storefront API token is only used by server-side code and must never be exposed in a `NEXT_PUBLIC_*` variable.
 
-## Run locally
+1. In Shopify Admin, enable the Headless sales channel and create a private Storefront API access token with only the required product-read access.
+2. Copy `.env.example` to `.env.local` and set `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`. The store domain and API version are configurable there too.
+3. Install dependencies and run the app:
 
 ```bash
+cp .env.example .env.local
+# Edit .env.local and set SHOPIFY_STOREFRONT_PRIVATE_TOKEN
 npm install
 npm run dev
 ```
 
-Then open:
+The storefront will then be available at `http://localhost:3000/customer`. `GET /api/products` returns a bounded product list and never returns credentials. The app fails closed with a configuration message if the token is not set.
 
-- http://localhost:3000
-- http://localhost:3000/admin
-- http://localhost:3000/customer
+Do not commit `.env.local`, share the private token, or use an Admin API token in the storefront. Shopify Admin data (orders, customer details, inventory management) is not connected: it requires a separately authenticated and authorized admin backend. The existing admin page is sample UI, not a live Shopify admin session.
 
-## Android / APK workflow
+## Routes
 
-This repository includes Capacitor configuration so the web app can be wrapped for Android builds.
+- `/` — VendraHub landing page
+- `/admin` — admin dashboard UI prototype (sample data only)
+- `/customer` — read-only Shopify product storefront
+- `/api/products` — server-side Shopify product search (`q` optional, `limit` capped at 20)
 
-```bash
-npm install
-npm run build
-npm run app:sync
-npm run app:open
-```
+## Android packaging
 
-The Android project can then be opened in Android Studio to generate an APK. This repo does not include a signed production APK because APK signing requires local Android SDK and keystore setup.
+The repository includes Capacitor configuration for Android packaging. APK generation needs Android Studio, Android SDK, Java/Gradle, and for release APKs, a signing keystore. Follow `android/README.md` for local setup. No signed APK is included in this repository.
 
-## Session model
+## Security and production readiness
 
-- Admin session: operational dashboard, inventory, order monitoring
-- Customer session: wallet summary, product browsing, support and order status
-
-## Next steps
-
-- connect the app to a real Shopify or ecommerce backend
-- add Supabase or authentication providers for sign-in
-- add product detail pages and admin CRUD workflows
-- add role-based access controls and secure API routes
+- Configure secrets only in local environment or the deployment provider's secret manager.
+- Use HTTPS in production and restrict the Storefront API token to the minimum needed access.
+- Add real admin/customer authentication before exposing private data or protected operations.
+- Verify the deployed site's API version and test Shopify error handling before launch.
