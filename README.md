@@ -2,6 +2,12 @@
 
 VendraHub is a Next.js commerce starter with separate admin and customer experience routes, plus a Capacitor Android packaging scaffold.
 
+## Supabase application connection
+
+The connected Supabase project is VendraHub (szishzerqvbdvhmysqpv) in eu-west-1. Its project URL is prefilled in .env.example; add the project's publishable key to your local environment or hosting configuration. The publishable key is designed for browser use, but database access must still be protected with Row Level Security (RLS). Never place a Supabase secret/service-role key in browser code or a NEXT_PUBLIC_ variable.
+
+The Supabase project is currently a clean database with no application tables or migrations. The Next.js application integration (SSR auth clients, session handling, schema and RLS policies) is not yet implemented. Do not treat the admin preview as authenticated until that work is complete and tested.
+
 ## Shopify storefront connection
 
 The customer page reads up to 20 products from the Shopify Storefront GraphQL API. It is read-only: it does not create orders, change inventory, or access customer records. The private Storefront API token is only used by server-side code and must never be exposed in a `NEXT_PUBLIC_*` variable.
@@ -45,7 +51,7 @@ The admin page reports whether the optional `CJ_API_KEY` environment variable is
 ## Routes
 
 - `/` — VendraHub landing page
-- `/admin` — admin integration readiness preview
+- `/admin` — admin workspace preview (not production-authenticated)
 - `/customer` — read-only Shopify product storefront
 - `/api/products` — server-side Shopify product search (`q` optional, `limit` capped at 20)
 
