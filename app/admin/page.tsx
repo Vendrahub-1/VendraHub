@@ -36,10 +36,15 @@ export default async function AdminPage() {
     <main className="admin-layout">
       <aside className="admin-sidebar">
         <Link href="/" className="admin-brand"><span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span></Link>
-        <div className="sidebar-label">WORKSPACE</div>
-        <nav aria-label="Admin navigation" className="admin-nav">
-          {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
-        </nav>
+        <details className="admin-mobile-navigation" open>
+          <summary>Workspace navigation</summary>
+          <div className="admin-nav-wrap">
+            <div className="sidebar-label">WORKSPACE</div>
+            <nav aria-label="Admin navigation" className="admin-nav">
+              {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
+            </nav>
+          </div>
+        </details>
         <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small><Link href="/">← Store home</Link></div>
       </aside>
 
