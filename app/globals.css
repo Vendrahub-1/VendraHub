@@ -323,3 +323,193 @@ body {
     padding: 15px;
   }
 }
+
+
+/* Interactive front-end admin preview */
+.brand-button {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.brand-button:hover .brand-mark { transform: translateY(-1px); }
+.brand-mark { transition: transform .15s ease; }
+.admin-nav button {
+  width: 100%;
+  border: 0;
+  color: #c4c4c4;
+  background: transparent;
+  padding: 10px 11px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 9px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.admin-nav button:hover,
+.admin-nav button.active {
+  background: #28251b;
+  color: #fff;
+}
+.admin-nav button.active { box-shadow: inset 3px 0 #c9a227; }
+.sidebar-bottom button {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c9a227;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.topbar-button {
+  border: 1px solid #ded4b7;
+  border-radius: 8px;
+  background: #fff;
+  color: #5b4a1b;
+  padding: 8px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.preview-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  margin: 0 0 18px;
+  border: 1px solid #e5d7ad;
+  border-radius: 10px;
+  background: #fbf7e9;
+  color: #5b4a1b;
+  font-size: 12px;
+}
+.preview-notice button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.quick-access-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #e9e7e1;
+  border-radius: 12px;
+  background: #fff;
+  color: #222;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.quick-access-button:hover { border-color: #c9a227; transform: translateY(-1px); }
+.quick-access-button b { color: #80651e; white-space: nowrap; }
+.preview-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 205px;
+}
+.preview-card-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.preview-icon { color: #b18a26; font-size: 22px; }
+.preview-status {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #f5f2e8;
+  color: #80651e;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.preview-card h3 { margin-bottom: 8px; }
+.preview-card > p { font-size: 12px; }
+.preview-action {
+  margin-top: auto;
+  padding: 14px 0 0;
+  border: 0;
+  background: transparent;
+  color: #80651e;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.preview-action span { margin-left: 5px; }
+.activity-placeholder { display: grid; gap: 0; }
+.activity-placeholder > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f0efec;
+}
+.activity-placeholder > div:last-child { border-bottom: 0; }
+.activity-placeholder b {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  border-radius: 50%;
+  background: #f5f2e8;
+  color: #80651e;
+  font-size: 10px;
+}
+.activity-placeholder span { display: grid; gap: 4px; }
+.activity-placeholder strong { font-size: 11px; }
+.activity-placeholder small { color: #888; font-size: 10px; }
+.supplier-links button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #79601e;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-footer button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #80651e;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  .admin-nav button { width: auto; flex: 0 0 auto; white-space: nowrap; }
+  .admin-nav button.active { box-shadow: inset 0 -2px #c9a227; }
+  .quick-access-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .preview-card-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 430px) {
+  .topbar-button { padding: 7px 8px; font-size: 10px; }
+  .quick-access-grid { grid-template-columns: minmax(0, 1fr); }
+}
