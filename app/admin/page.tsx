@@ -1,29 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const navigation = [
-  { id: 'overview', label: 'Overview', group: 'WORKSPACE' },
-  { id: 'products', label: 'Products' },
-  { id: 'orders', label: 'Orders' },
-  { id: 'customers', label: 'Customers' },
-  { id: 'suppliers', label: 'Suppliers' },
-  { id: 'inventory', label: 'Inventory' },
-  { id: 'finance', label: 'Sales & profit' },
-  { id: 'support', label: 'Support' },
-  { id: 'assistant', label: 'AI assistant' },
-  { id: 'staff', label: 'Staff & access' },
-  { id: 'notifications', label: 'Notifications' },
-  { id: 'reports', label: 'Reports' },
-  { id: 'settings', label: 'Settings' },
+const primaryNavigation = [
+  { id: 'overview', label: 'Home', group: 'PRIMARY' },
+  { id: 'products', label: 'Products', group: 'PRIMARY' },
+  { id: 'orders', label: 'Orders', group: 'PRIMARY' },
 ] as const;
 
-type ScreenId = (typeof navigation)[number]['id'];
+const secondaryNavigation = [
+  { id: 'customers', label: 'Customers', group: 'Store management', keywords: 'buyers customer directory profiles' },
+  { id: 'inventory', label: 'Inventory', group: 'Store management', keywords: 'stock sku availability low stock' },
+  { id: 'discounts', label: 'Discounts & promotions', group: 'Store management', keywords: 'coupon offers promo codes sales' },
+  { id: 'suppliers', label: 'Suppliers & dropshipping', group: 'Sourcing & fulfilment', keywords: 'syncee sourcing supplier fulfilment dsers cj' },
+  { id: 'finance', label: 'Sales & profit', group: 'Business insights', keywords: 'revenue costs margin fees currency' },
+  { id: 'reports', label: 'Reports', group: 'Business insights', keywords: 'analytics performance export' },
+  { id: 'support', label: 'Customer support', group: 'Customer experience', keywords: 'inbox enquiries returns complaints' },
+  { id: 'notifications', label: 'Notifications', group: 'Customer experience', keywords: 'alerts messages updates' },
+  { id: 'assistant', label: 'AI assistant', group: 'AI & administration', keywords: 'artificial intelligence drafts recommendations' },
+  { id: 'staff', label: 'Staff & permissions', group: 'AI & administration', keywords: 'users roles access team' },
+  { id: 'audit', label: 'Audit & security', group: 'AI & administration', keywords: 'logs security activity events' },
+  { id: 'settings', label: 'Settings', group: 'AI & administration', keywords: 'configuration preferences integrations' },
+] as const;
 
-const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: string; subtitle: string; description: string; cards: { title: string; detail: string }[] }> = {
+type ScreenId = (typeof primaryNavigation)[number]['id'] | (typeof secondaryNavigation)[number]['id'];
+
+const screenCopy: Record<Exclude<ScreenId, 'overview'>, { title: string; subtitle: string; description: string; cards: { title: string; detail: string }[] }> = {
   products: {
-    title: 'Products',
-    subtitle: 'Catalogue and product management',
+    title: 'Products', subtitle: 'Catalogue and product management',
     description: 'Review the product workspace layout. Product records, variants, prices and publishing controls will be connected later.',
     cards: [
       { title: 'Product catalogue', detail: 'Placeholder for product search, categories, product status and catalogue rows.' },
@@ -32,8 +36,7 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
     ],
   },
   orders: {
-    title: 'Orders',
-    subtitle: 'Order review and fulfilment workspace',
+    title: 'Orders', subtitle: 'Order review and fulfilment workspace',
     description: 'This is a preview of the order-management screen. No live orders or payment information is loaded.',
     cards: [
       { title: 'All orders', detail: 'Placeholder table for order number, date, customer, status and total.' },
@@ -42,8 +45,7 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
     ],
   },
   customers: {
-    title: 'Customers',
-    subtitle: 'Customer directory and support context',
+    title: 'Customers', subtitle: 'Customer directory and support context',
     description: 'Customer data is intentionally not loaded in this front-end preview.',
     cards: [
       { title: 'Customer directory', detail: 'Placeholder for customer search, contact details and account status.' },
@@ -51,8 +53,7 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
     ],
   },
   inventory: {
-    title: 'Inventory',
-    subtitle: 'Stock, SKUs and supplier availability',
+    title: 'Inventory', subtitle: 'Stock, SKUs and supplier availability',
     description: 'No live inventory is read or modified in preview mode.',
     cards: [
       { title: 'Stock overview', detail: 'Placeholder for SKU, available quantity, reserved quantity and stock status.' },
@@ -60,9 +61,17 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
       { title: 'Low-stock alerts', detail: 'A review queue for products that need attention.' },
     ],
   },
+  discounts: {
+    title: 'Discounts & promotions', subtitle: 'Campaigns, discount codes and offers',
+    description: 'Promotion management is display-only in this preview. No discount codes are created or changed.',
+    cards: [
+      { title: 'Discount codes', detail: 'Placeholder for code, discount type, usage limits and active dates.' },
+      { title: 'Automatic promotions', detail: 'Review planned offers and eligibility rules before approval.' },
+      { title: 'Campaign performance', detail: 'Verified redemption and sales data will appear after integration.' },
+    ],
+  },
   finance: {
-    title: 'Sales & profit',
-    subtitle: 'Revenue, costs and margin reporting',
+    title: 'Sales & profit', subtitle: 'Revenue, costs and margin reporting',
     description: 'No financial figures are fabricated. Verified sales, fees, supplier costs and shipping data will populate this screen later.',
     cards: [
       { title: 'Sales summary', detail: 'Placeholder for gross sales, discounts, refunds and net sales.' },
@@ -70,18 +79,33 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
       { title: 'Currency overview', detail: 'Currency conversion and reporting rules will be configured before live reporting.' },
     ],
   },
+  reports: {
+    title: 'Reports', subtitle: 'Store performance and operational analytics',
+    description: 'Reports will remain empty until verified data sources are connected.',
+    cards: [
+      { title: 'Sales reports', detail: 'Placeholder for sales by period, product and country.' },
+      { title: 'Supplier performance', detail: 'Placeholder for delivery reliability, stock accuracy and cost comparisons.' },
+      { title: 'Store performance', detail: 'Placeholder for conversion, returns and customer support trends.' },
+    ],
+  },
   support: {
-    title: 'Customer support',
-    subtitle: 'Enquiries and resolution workflow',
+    title: 'Customer support', subtitle: 'Enquiries and resolution workflow',
     description: 'This preview does not read customer messages or send replies.',
     cards: [
       { title: 'Inbox', detail: 'Placeholder for open, pending and resolved support requests.' },
       { title: 'Returns and complaints', detail: 'A triage workspace for customer issues and return requests.' },
     ],
   },
+  notifications: {
+    title: 'Notifications', subtitle: 'Store, supplier and security alerts',
+    description: 'No email, SMS or push notifications are sent from this screen.',
+    cards: [
+      { title: 'Notification centre', detail: 'Placeholder for unread alerts, status and timestamps.' },
+      { title: 'Delivery settings', detail: 'Notification channels and templates will be configured later.' },
+    ],
+  },
   assistant: {
-    title: 'AI assistant',
-    subtitle: 'Research, explanations and draft recommendations',
+    title: 'AI assistant', subtitle: 'Research, explanations and draft recommendations',
     description: 'The assistant workspace is a visual placeholder. It cannot execute store operations.',
     cards: [
       { title: 'Supplier research', detail: 'Compare supplier reliability, delivered cost and stock consistency.' },
@@ -90,37 +114,25 @@ const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: s
     ],
   },
   staff: {
-    title: 'Staff & access',
-    subtitle: 'Roles, permissions and audit visibility',
-    description: 'Staff management is not active in this preview. Existing owner authentication has not been changed.',
+    title: 'Staff & permissions', subtitle: 'Roles, permissions and access management',
+    description: 'Staff management is not active in this preview. Permission changes are disabled.',
     cards: [
       { title: 'Administrator roles', detail: 'Placeholder for owner, manager and support roles.' },
       { title: 'Permissions', detail: 'A permission matrix will be configured before staff access is enabled.' },
-      { title: 'Audit history', detail: 'Privileged actions and administrative events will be shown here.' },
+      { title: 'Team access', detail: 'Invitations and access reviews will appear here after the security model is approved.' },
     ],
   },
-  notifications: {
-    title: 'Notifications',
-    subtitle: 'Store, supplier and security alerts',
-    description: 'No email, SMS or push notifications are sent from this screen.',
+  audit: {
+    title: 'Audit & security', subtitle: 'Administrative activity and security review',
+    description: 'The audit workspace is a placeholder. No live security events are loaded.',
     cards: [
-      { title: 'Notification centre', detail: 'Placeholder for unread alerts, status and timestamps.' },
-      { title: 'Delivery settings', detail: 'Notification channels and templates will be configured later.' },
-    ],
-  },
-  reports: {
-    title: 'Reports',
-    subtitle: 'Store performance and operational analytics',
-    description: 'Reports will remain empty until verified data sources are connected.',
-    cards: [
-      { title: 'Sales reports', detail: 'Placeholder for sales by period, product and country.' },
-      { title: 'Supplier performance', detail: 'Placeholder for delivery reliability, stock accuracy and cost comparisons.' },
-      { title: 'Store performance', detail: 'Placeholder for conversion, returns and customer support trends.' },
+      { title: 'Audit history', detail: 'A timestamped record of approved administrative changes.' },
+      { title: 'Security checks', detail: 'Review authentication, permissions and integration status.' },
+      { title: 'Access events', detail: 'Sign-in and privileged access records will appear after secure backend integration.' },
     ],
   },
   settings: {
-    title: 'Settings',
-    subtitle: 'Store configuration and system preferences',
+    title: 'Settings', subtitle: 'Store configuration and system preferences',
     description: 'Settings are display-only in this preview. Changes are not saved.',
     cards: [
       { title: 'Store profile', detail: 'VendraHub · More Choice. Better Living. · vendrahub.com' },
@@ -146,42 +158,77 @@ export default function AdminPage() {
   const [active, setActive] = useState<ScreenId>('overview');
   const [notice, setNotice] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredNavigation = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return secondaryNavigation;
+    return secondaryNavigation.filter(item =>
+      item.label.toLowerCase().includes(term) ||
+      item.group.toLowerCase().includes(term) ||
+      item.keywords.includes(term)
+    );
+  }, [searchTerm]);
+
+  const navigationGroups = useMemo(() => {
+    const groups = new Map<string, typeof filteredNavigation[number][]>();
+    filteredNavigation.forEach(item => {
+      const current = groups.get(item.group) ?? [];
+      groups.set(item.group, [...current, item]);
+    });
+    return Array.from(groups.entries());
+  }, [filteredNavigation]);
+
+  const current = active === 'overview'
+    ? { label: 'Dashboard' }
+    : primaryNavigation.find(item => item.id === active) ?? secondaryNavigation.find(item => item.id === active)!;
 
   function openScreen(id: ScreenId) {
     setActive(id);
     setNotice('');
     setMobileMenuOpen(false);
+    setSearchTerm('');
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function showPlaceholder(message: string) {
-    setNotice(message);
-  }
-
-  const currentIndex = navigation.findIndex(item => item.id === active);
-  const current = navigation[currentIndex];
+  function showPlaceholder(message: string) { setNotice(message); }
 
   return (
     <main className="admin-layout">
-      <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-sidebar-open" : ""}`}>
-        <button type="button" className="admin-brand brand-button" onClick={() => openScreen('overview')} aria-label="Open dashboard overview">
+      <aside className={`admin-sidebar${mobileMenuOpen ? ' mobile-sidebar-open' : ''}`}>
+        <button type="button" className="admin-brand brand-button" onClick={() => openScreen('overview')} aria-label="Open dashboard home">
           <span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span>
         </button>
-        <div className="sidebar-label">WORKSPACE</div>
-        <nav aria-label="Admin navigation" className="admin-nav">
-          {navigation.map((item, index) => (
-            <button key={item.id} type="button" onClick={() => openScreen(item.id)} className={active === item.id ? 'active' : ''} aria-current={active === item.id ? 'page' : undefined}>
-              <span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{item.label}
-            </button>
-          ))}
+        <div className="sidebar-label">FIND A WORKSPACE</div>
+        <label className="sidebar-search">
+          <span aria-hidden="true">⌕</span>
+          <input aria-label="Search admin sections" value={searchTerm} onChange={event => setSearchTerm(event.target.value)} placeholder="Search sections..." />
+          {searchTerm && <button type="button" aria-label="Clear search" onClick={() => setSearchTerm('')}>×</button>}
+        </label>
+        <nav aria-label="Secondary admin navigation" className="admin-nav">
+          {navigationGroups.length ? navigationGroups.map(([group, items]) => (
+            <section className="nav-group" key={group}>
+              <div className="sidebar-label nav-group-label">{group}</div>
+              {items.map(item => (
+                <button key={item.id} type="button" onClick={() => openScreen(item.id)} className={active === item.id ? 'active' : ''} aria-current={active === item.id ? 'page' : undefined}>
+                  <span className="nav-dot">{item.label.slice(0, 1)}</span>{item.label}
+                </button>
+              ))}
+            </section>
+          )) : <p className="nav-no-results">No matching section. Try another search.</p>}
         </nav>
-        <div className="sidebar-bottom"><span className="status-dot" /> Front-end preview <small>Backend integrations are not connected in this view.</small><button type="button" onClick={() => openScreen('overview')}>← Back to overview</button></div>
+        <div className="sidebar-bottom"><span className="status-dot" /> Front-end preview <small>Backend integrations are not connected in this view.</small><button type="button" onClick={() => openScreen('overview')}>← Dashboard home</button></div>
       </aside>
 
       <div className="admin-main">
         <header className="admin-topbar">
           <div className="topbar-title"><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>{current.label}</strong></div>
-          <div className="topbar-actions"><button type="button" className="mobile-more-toggle" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>{mobileMenuOpen ? "Close menu" : "More"}</button><span className="preview-chip">FRONT-END PREVIEW</span><button type="button" className="topbar-button" onClick={() => openScreen('overview')}>Dashboard home</button><a href="https://www.vendrahub.com/" target="_blank" rel="noreferrer">Storefront ↗</a></div>
+          <div className="topbar-actions">
+            <button type="button" className="mobile-more-toggle" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>{mobileMenuOpen ? 'Close' : 'More'}</button>
+            <button type="button" className="notification-button" aria-label="Open notifications" title="Notifications" onClick={() => openScreen('notifications')}><span aria-hidden="true">♧</span><i /></button>
+            <span className="preview-chip">FRONT-END PREVIEW</span>
+            <a href="https://www.vendrahub.com/" target="_blank" rel="noreferrer">Storefront ↗</a>
+          </div>
         </header>
 
         <div className="admin-content">
@@ -189,19 +236,18 @@ export default function AdminPage() {
 
           {active === 'overview' ? (
             <>
-              <section className="admin-welcome">
-                <div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Welcome to VendraHub <span>administration.</span></h1><p>Explore the dashboard and every administration screen. All business data below is illustrative placeholder content.</p></div>
-                <div className="welcome-date">ADMIN WORKSPACE<br/><strong>PREVIEW MODE</strong></div>
+              <section className="admin-welcome dashboard-welcome">
+                <div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Dashboard</h1><p>Your VendraHub activity at a glance.</p></div>
+                <button type="button" className="dashboard-ai-button" onClick={() => openScreen('assistant')}><span aria-hidden="true">✧</span><span><strong>AI assistant</strong><small>Open your AI workspace</small></span><b>→</b></button>
               </section>
-              <div className="admin-alert"><span className="alert-icon">i</span><div><strong>Front-end preview — no backend data is connected to this dashboard</strong><p>Navigation and preview controls work. Products, orders, customer information, inventory, sales and supplier records are placeholders. No store changes or messages are sent.</p></div></div>
-              <div className="admin-metrics">
-                {[['Total products','—','Placeholder · awaiting connection'],['Orders today','—','Placeholder · awaiting connection'],['Customers','—','Placeholder · awaiting connection'],['Sales & profit','—','No financial figures displayed']].map(metric => <article className="metric-card" key={metric[0]}><span>{metric[0]}</span><strong>{metric[1]}</strong><small>{metric[2]}</small></article>)}
-              </div>
-              <div className="overview-grid">
-                <article className="admin-card"><div className="card-heading"><div><h3>Store activity</h3><p>Activity timeline preview</p></div><span className="muted-tag">DEMO</span></div><div className="activity-placeholder"><div><b>01</b><span><strong>Admin workspace prepared</strong><small>Navigation and screen layout available</small></span></div><div><b>02</b><span><strong>Backend connection pending</strong><small>Live store data will appear in a later phase</small></span></div><div><b>03</b><span><strong>Operations remain disabled</strong><small>No product, order, payment or inventory changes</small></span></div></div></article>
-                <article className="admin-card"><div className="card-heading"><div><h3>Workspace readiness</h3><p>Front-end modules</p></div><span className="muted-tag">PREVIEW</span></div><ul className="readiness-list">{navigation.slice(1).map(item => <li key={item.id}><span>{item.label}</span><b className="state">Preview available</b></li>)}</ul></article>
-              </div>
-              <section className="admin-section"><div className="section-heading"><p className="admin-kicker">QUICK ACCESS</p><h2>Open a workspace</h2><p>Choose a section to inspect its layout and placeholder controls.</p></div><div className="quick-access-grid">{navigation.slice(1, 7).map(item => <button type="button" className="quick-access-button" key={item.id} onClick={() => openScreen(item.id)}><span>{item.label}</span><b>Open →</b></button>)}</div></section>
+              <section className="admin-card dashboard-activity" aria-labelledby="activity-title">
+                <div className="card-heading"><div><h3 id="activity-title">Recent activity</h3><p>Updates and events from your store workspace</p></div><span className="muted-tag">ACTIVITY</span></div>
+                <div className="activity-empty">
+                  <span className="activity-empty-icon" aria-hidden="true">◷</span>
+                  <strong>No activity to display yet</strong>
+                  <p>Store and admin activity will appear here when the authorised data connections are enabled.</p>
+                </div>
+              </section>
             </>
           ) : active === 'suppliers' ? (
             <>
@@ -217,7 +263,7 @@ export default function AdminPage() {
             </>
           ) : (
             <>
-              <section className="admin-welcome"><div><p className="admin-kicker">VENDRAHUB MANAGEMENT</p><h1>{screenCopy[active].title}</h1><p>{screenCopy[active].subtitle}</p></div><div className="welcome-date">SCREEN {String(currentIndex + 1).padStart(2, '0')}<br/><strong>PREVIEW MODE</strong></div></section>
+              <section className="admin-welcome"><div><p className="admin-kicker">VENDRAHUB MANAGEMENT</p><h1>{screenCopy[active].title}</h1><p>{screenCopy[active].subtitle}</p></div><div className="welcome-date">PREVIEW MODE</div></section>
               <div className="admin-alert"><span className="alert-icon">i</span><div><strong>{screenCopy[active].title} is a front-end placeholder</strong><p>{screenCopy[active].description}</p></div></div>
               <div className="preview-card-grid">{screenCopy[active].cards.map(card => <PlaceholderCard key={card.title} title={card.title} detail={card.detail} onPreview={() => showPlaceholder(card.title + ': this screen is a visual placeholder. Backend connection is intentionally disabled.')}/>)}</div>
             </>
@@ -226,8 +272,8 @@ export default function AdminPage() {
           <footer className="admin-footer"><span>VendraHub · Administration</span><span>Black · White · Gold · Preview only</span><button type="button" onClick={() => openScreen('overview')}>Return to dashboard ↑</button></footer>
         </div>
       </div>
-    
-      <nav className="mobile-app-nav" aria-label="App navigation">
+
+      <nav className="mobile-app-nav" aria-label="Primary app navigation">
         <button type="button" className={active === 'overview' ? 'active' : ''} onClick={() => openScreen('overview')}><span aria-hidden="true">⌂</span><small>Home</small></button>
         <button type="button" className={active === 'products' ? 'active' : ''} onClick={() => openScreen('products')}><span aria-hidden="true">◇</span><small>Products</small></button>
         <button type="button" className={active === 'orders' ? 'active' : ''} onClick={() => openScreen('orders')}><span aria-hidden="true">▤</span><small>Orders</small></button>
