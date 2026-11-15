@@ -513,3 +513,64 @@ body {
   .topbar-button { padding: 7px 8px; font-size: 10px; }
   .quick-access-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+/* VendraHub mobile app shell: compact phone/tablet navigation */
+.mobile-app-nav, .mobile-more-toggle { display: none; }
+@media (max-width: 760px) {
+  body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .admin-layout { display: block; min-height: 100svh; }
+  .admin-sidebar { display: none; }
+  .admin-sidebar.mobile-sidebar-open {
+    display: flex; position: fixed; z-index: 30; inset: 10px 10px calc(76px + env(safe-area-inset-bottom));
+    width: auto; height: auto; min-height: 0; overflow-y: auto; border: 1px solid #3b3523;
+    border-radius: 16px; box-shadow: 0 18px 60px rgba(0,0,0,.34); padding: 18px;
+  }
+  .admin-sidebar.mobile-sidebar-open .admin-brand { padding-bottom: 18px; }
+  .admin-sidebar.mobile-sidebar-open .sidebar-label { display: block; }
+  .admin-sidebar.mobile-sidebar-open .sidebar-bottom { display: block; }
+  .admin-sidebar.mobile-sidebar-open .admin-nav { display: grid; overflow: visible; }
+  .admin-sidebar.mobile-sidebar-open .admin-nav button { width: 100%; }
+  .admin-sidebar.mobile-sidebar-open .nav-dot { display: inline; }
+  .admin-main { width: 100%; min-width: 0; }
+  .admin-topbar { position: sticky; top: 0; z-index: 10; min-height: 62px; padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
+  .topbar-title { min-width: 0; }
+  .topbar-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .topbar-overline { font-size: 8px; }
+  .topbar-actions { gap: 7px; flex-wrap: nowrap; }
+  .mobile-more-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 11px; border: 1px solid #ded4b7; border-radius: 8px; background: #fff; color: #5b4a1b; font-size: 11px; font-weight: 700; }
+  .preview-chip { padding: 6px 7px; font-size: 8px; white-space: nowrap; }
+  .topbar-button, .topbar-actions a { display: none; }
+  .admin-content { padding: 18px 14px 30px; }
+  .admin-welcome { padding-top: 4px; }
+  .admin-welcome h1 { font-size: clamp(25px, 7vw, 34px); }
+  .admin-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .overview-grid, .settings-grid, .supplier-grid, .preview-card-grid { grid-template-columns: minmax(0,1fr); }
+  .quick-access-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .admin-footer { margin-top: 26px; }
+  .mobile-app-nav {
+    position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr)); gap: 2px;
+    padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid #e6e1d4; background: rgba(255,255,255,.97);
+    box-shadow: 0 -8px 24px rgba(17,17,17,.08); backdrop-filter: blur(14px);
+  }
+  .mobile-app-nav button { min-width: 0; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 10px; background: transparent; color: #777; }
+  .mobile-app-nav button > span { font-size: 19px; line-height: 1.1; }
+  .mobile-app-nav button small { font-size: 10px; font-weight: 700; }
+  .mobile-app-nav button.active { color: #6f5714; background: #faf5e6; }
+}
+@media (max-width: 380px) {
+  .preview-chip { display: none; }
+  .topbar-title strong { max-width: 54vw; }
+  .admin-content { padding-left: 12px; padding-right: 12px; }
+  .metric-card { padding: 11px; }
+  .quick-access-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  .admin-layout { grid-template-columns: 205px minmax(0,1fr); }
+  .admin-sidebar { padding-left: 12px; padding-right: 12px; }
+  .admin-content { padding-left: 22px; padding-right: 22px; }
+  .admin-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .overview-grid { grid-template-columns: minmax(0,1fr); }
+}
