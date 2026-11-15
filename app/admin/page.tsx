@@ -145,10 +145,12 @@ function PlaceholderCard({ title, detail, onPreview }: { title: string; detail: 
 export default function AdminPage() {
   const [active, setActive] = useState<ScreenId>('overview');
   const [notice, setNotice] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function openScreen(id: ScreenId) {
     setActive(id);
     setNotice('');
+    setMobileMenuOpen(false);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -161,7 +163,7 @@ export default function AdminPage() {
 
   return (
     <main className="admin-layout">
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-sidebar-open" : ""}`}>
         <button type="button" className="admin-brand brand-button" onClick={() => openScreen('overview')} aria-label="Open dashboard overview">
           <span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span>
         </button>
@@ -178,8 +180,8 @@ export default function AdminPage() {
 
       <div className="admin-main">
         <header className="admin-topbar">
-          <div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>{current.label}</strong></div>
-          <div className="topbar-actions"><span className="preview-chip">FRONT-END PREVIEW</span><button type="button" className="topbar-button" onClick={() => openScreen('overview')}>Dashboard home</button><a href="https://www.vendrahub.com/" target="_blank" rel="noreferrer">Storefront ↗</a></div>
+          <div className="topbar-title"><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>{current.label}</strong></div>
+          <div className="topbar-actions"><button type="button" className="mobile-more-toggle" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>{mobileMenuOpen ? "Close menu" : "More"}</button><span className="preview-chip">FRONT-END PREVIEW</span><button type="button" className="topbar-button" onClick={() => openScreen('overview')}>Dashboard home</button><a href="https://www.vendrahub.com/" target="_blank" rel="noreferrer">Storefront ↗</a></div>
         </header>
 
         <div className="admin-content">
@@ -224,6 +226,13 @@ export default function AdminPage() {
           <footer className="admin-footer"><span>VendraHub · Administration</span><span>Black · White · Gold · Preview only</span><button type="button" onClick={() => openScreen('overview')}>Return to dashboard ↑</button></footer>
         </div>
       </div>
+    
+      <nav className="mobile-app-nav" aria-label="App navigation">
+        <button type="button" className={active === 'overview' ? 'active' : ''} onClick={() => openScreen('overview')}><span aria-hidden="true">⌂</span><small>Home</small></button>
+        <button type="button" className={active === 'products' ? 'active' : ''} onClick={() => openScreen('products')}><span aria-hidden="true">◇</span><small>Products</small></button>
+        <button type="button" className={active === 'orders' ? 'active' : ''} onClick={() => openScreen('orders')}><span aria-hidden="true">▤</span><small>Orders</small></button>
+        <button type="button" className={mobileMenuOpen ? 'active' : ''} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}><span aria-hidden="true">•••</span><small>More</small></button>
+      </nav>
     </main>
   );
 }
