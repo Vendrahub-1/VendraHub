@@ -1,119 +1,227 @@
-import Link from 'next/link';
-import SignOutButton from '@/components/sign-out-button';
-import { createClient } from '@/lib/supabase/server';
+'use client';
 
-const suppliers = [
-  { name: 'Syncee', method: 'Shopify app authorisation', status: 'Awaiting authorisation', detail: 'Install Syncee from Shopify Admin and complete its merchant-authorised connection.', url: 'https://admin.shopify.com/store/vendrahub-store/apps', docs: 'https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store' },
-  { name: 'DSers', method: 'Shopify app authorisation', status: 'Awaiting authorisation', detail: 'Install DSers from Shopify Admin and link the VendraHub store.', url: 'https://admin.shopify.com/store/vendrahub-store/apps', docs: 'https://help.dsers.com/link-shopify-store/' },
-  { name: 'CJdropshipping', method: 'Shopify app or optional direct API', status: process.env.CJ_API_KEY ? 'Credential present · unverified' : 'Not connected', detail: 'A configured key is not proof of a working API connection. Keep all credentials server-side.', url: 'https://www.cjdropshipping.com/my.html#/authorize/API', docs: 'https://developers.cjdropshipping.com/en/api/start/apikey.html' },
-];
+import { useState } from 'react';
 
-const nav = [
-  ['Overview', 'overview'], ['Products', 'products'], ['Orders', 'orders'], ['Customers', 'customers'],
-  ['Suppliers', 'suppliers'], ['Inventory', 'inventory'], ['Sales & profit', 'finance'], ['Support', 'support'],
-  ['AI assistant', 'assistant'], ['Staff & access', 'staff'], ['Notifications', 'notifications'],
-  ['Reports', 'reports'], ['Settings', 'settings'],
+const navigation = [
+  { id: 'overview', label: 'Overview', group: 'WORKSPACE' },
+  { id: 'products', label: 'Products' },
+  { id: 'orders', label: 'Orders' },
+  { id: 'customers', label: 'Customers' },
+  { id: 'suppliers', label: 'Suppliers' },
+  { id: 'inventory', label: 'Inventory' },
+  { id: 'finance', label: 'Sales & profit' },
+  { id: 'support', label: 'Support' },
+  { id: 'assistant', label: 'AI assistant' },
+  { id: 'staff', label: 'Staff & access' },
+  { id: 'notifications', label: 'Notifications' },
+  { id: 'reports', label: 'Reports' },
+  { id: 'settings', label: 'Settings' },
 ] as const;
 
-function Section({ id, title, description, children }: { id: string; title: string; description: string; children: React.ReactNode }) {
-  return <section id={id} className="admin-section"><div className="section-heading"><div><p className="admin-kicker">MANAGEMENT</p><h2>{title}</h2><p>{description}</p></div></div>{children}</section>;
+type ScreenId = (typeof navigation)[number]['id'];
+
+const screenCopy: Record<Exclude<ScreenId, 'overview' | 'suppliers'>, { title: string; subtitle: string; description: string; cards: { title: string; detail: string }[] }> = {
+  products: {
+    title: 'Products',
+    subtitle: 'Catalogue and product management',
+    description: 'Review the product workspace layout. Product records, variants, prices and publishing controls will be connected later.',
+    cards: [
+      { title: 'Product catalogue', detail: 'Placeholder for product search, categories, product status and catalogue rows.' },
+      { title: 'Add a product', detail: 'The product creation flow will appear here after the Shopify Admin integration is approved.' },
+      { title: 'Product approvals', detail: 'Review supplier products and approve each import before it can enter the store.' },
+    ],
+  },
+  orders: {
+    title: 'Orders',
+    subtitle: 'Order review and fulfilment workspace',
+    description: 'This is a preview of the order-management screen. No live orders or payment information is loaded.',
+    cards: [
+      { title: 'All orders', detail: 'Placeholder table for order number, date, customer, status and total.' },
+      { title: 'Returns and refunds', detail: 'A review queue will be displayed here. Refund actions are not available in preview mode.' },
+      { title: 'Fulfilment', detail: 'Shipment, tracking and supplier fulfilment status will appear here after integration.' },
+    ],
+  },
+  customers: {
+    title: 'Customers',
+    subtitle: 'Customer directory and support context',
+    description: 'Customer data is intentionally not loaded in this front-end preview.',
+    cards: [
+      { title: 'Customer directory', detail: 'Placeholder for customer search, contact details and account status.' },
+      { title: 'Customer history', detail: 'Order and interaction history will appear here when authorised data access is configured.' },
+    ],
+  },
+  inventory: {
+    title: 'Inventory',
+    subtitle: 'Stock, SKUs and supplier availability',
+    description: 'No live inventory is read or modified in preview mode.',
+    cards: [
+      { title: 'Stock overview', detail: 'Placeholder for SKU, available quantity, reserved quantity and stock status.' },
+      { title: 'Supplier stock checks', detail: 'Supplier availability and last-checked timestamps will appear here after integration.' },
+      { title: 'Low-stock alerts', detail: 'A review queue for products that need attention.' },
+    ],
+  },
+  finance: {
+    title: 'Sales & profit',
+    subtitle: 'Revenue, costs and margin reporting',
+    description: 'No financial figures are fabricated. Verified sales, fees, supplier costs and shipping data will populate this screen later.',
+    cards: [
+      { title: 'Sales summary', detail: 'Placeholder for gross sales, discounts, refunds and net sales.' },
+      { title: 'Profit and margin', detail: 'Placeholder for supplier cost, delivery cost, platform fees and realised margin.' },
+      { title: 'Currency overview', detail: 'Currency conversion and reporting rules will be configured before live reporting.' },
+    ],
+  },
+  support: {
+    title: 'Customer support',
+    subtitle: 'Enquiries and resolution workflow',
+    description: 'This preview does not read customer messages or send replies.',
+    cards: [
+      { title: 'Inbox', detail: 'Placeholder for open, pending and resolved support requests.' },
+      { title: 'Returns and complaints', detail: 'A triage workspace for customer issues and return requests.' },
+    ],
+  },
+  assistant: {
+    title: 'AI assistant',
+    subtitle: 'Research, explanations and draft recommendations',
+    description: 'The assistant workspace is a visual placeholder. It cannot execute store operations.',
+    cards: [
+      { title: 'Supplier research', detail: 'Compare supplier reliability, delivered cost and stock consistency.' },
+      { title: 'Content drafts', detail: 'Prepare product descriptions and marketing copy for human review.' },
+      { title: 'Operations insights', detail: 'Summarise verified trends and flag data-quality issues.' },
+    ],
+  },
+  staff: {
+    title: 'Staff & access',
+    subtitle: 'Roles, permissions and audit visibility',
+    description: 'Staff management is not active in this preview. Existing owner authentication has not been changed.',
+    cards: [
+      { title: 'Administrator roles', detail: 'Placeholder for owner, manager and support roles.' },
+      { title: 'Permissions', detail: 'A permission matrix will be configured before staff access is enabled.' },
+      { title: 'Audit history', detail: 'Privileged actions and administrative events will be shown here.' },
+    ],
+  },
+  notifications: {
+    title: 'Notifications',
+    subtitle: 'Store, supplier and security alerts',
+    description: 'No email, SMS or push notifications are sent from this screen.',
+    cards: [
+      { title: 'Notification centre', detail: 'Placeholder for unread alerts, status and timestamps.' },
+      { title: 'Delivery settings', detail: 'Notification channels and templates will be configured later.' },
+    ],
+  },
+  reports: {
+    title: 'Reports',
+    subtitle: 'Store performance and operational analytics',
+    description: 'Reports will remain empty until verified data sources are connected.',
+    cards: [
+      { title: 'Sales reports', detail: 'Placeholder for sales by period, product and country.' },
+      { title: 'Supplier performance', detail: 'Placeholder for delivery reliability, stock accuracy and cost comparisons.' },
+      { title: 'Store performance', detail: 'Placeholder for conversion, returns and customer support trends.' },
+    ],
+  },
+  settings: {
+    title: 'Settings',
+    subtitle: 'Store configuration and system preferences',
+    description: 'Settings are display-only in this preview. Changes are not saved.',
+    cards: [
+      { title: 'Store profile', detail: 'VendraHub · More Choice. Better Living. · vendrahub.com' },
+      { title: 'Regional preferences', detail: 'Nigeria and international customers. Currency and tax rules require verification.' },
+      { title: 'Security', detail: 'Owner authentication, MFA, least-privilege access and audit logging.' },
+      { title: 'Integrations', detail: 'Shopify Admin API and supplier connections will be configured in a later phase.' },
+    ],
+  },
+};
+
+function PlaceholderCard({ title, detail, onPreview }: { title: string; detail: string; onPreview: () => void }) {
+  return (
+    <article className="admin-card preview-card">
+      <div className="preview-card-top"><span className="preview-icon">◇</span><span className="preview-status">PLACEHOLDER</span></div>
+      <h3>{title}</h3>
+      <p>{detail}</p>
+      <button type="button" className="preview-action" onClick={onPreview}>Preview section <span aria-hidden="true">→</span></button>
+    </article>
+  );
 }
 
-function EmptyState({ title, detail }: { title: string; detail: string }) {
-  return <div className="admin-empty"><span className="empty-mark">—</span><strong>{title}</strong><p>{detail}</p></div>;
-}
+export default function AdminPage() {
+  const [active, setActive] = useState<ScreenId>('overview');
+  const [notice, setNotice] = useState('');
 
-export default async function AdminPage() {
-  const supabase = await createClient();
-  const [ticketsResult, auditResult, supplierResult] = await Promise.all([
-    supabase.from('support_tickets').select('id', { count: 'exact', head: true }),
-    supabase.from('audit_events').select('id', { count: 'exact', head: true }),
-    supabase.from('supplier_connections').select('supplier_code, connection_status').order('supplier_code'),
-  ]);
-  const supplierStatuses = new Map<string, string>((supplierResult.data ?? []).map(item => [item.supplier_code, item.connection_status] as [string, string]));
-  const supplierCount = supplierResult.data?.length ?? 0;
+  function openScreen(id: ScreenId) {
+    setActive(id);
+    setNotice('');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showPlaceholder(message: string) {
+    setNotice(message);
+  }
+
+  const currentIndex = navigation.findIndex(item => item.id === active);
+  const current = navigation[currentIndex];
+
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
-        <Link href="/" className="admin-brand"><span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span></Link>
+        <button type="button" className="admin-brand brand-button" onClick={() => openScreen('overview')} aria-label="Open dashboard overview">
+          <span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span>
+        </button>
         <div className="sidebar-label">WORKSPACE</div>
         <nav aria-label="Admin navigation" className="admin-nav">
-          {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
+          {navigation.map((item, index) => (
+            <button key={item.id} type="button" onClick={() => openScreen(item.id)} className={active === item.id ? 'active' : ''} aria-current={active === item.id ? 'page' : undefined}>
+              <span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{item.label}
+            </button>
+          ))}
         </nav>
-        <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small><Link href="/">← Store home</Link></div>
+        <div className="sidebar-bottom"><span className="status-dot" /> Front-end preview <small>Backend integrations are not connected in this view.</small><button type="button" onClick={() => openScreen('overview')}>← Back to overview</button></div>
       </aside>
 
       <div className="admin-main">
-        <header className="admin-topbar"><div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>Store control center</strong></div><div className="topbar-actions"><span className="preview-chip">OWNER WORKSPACE</span><SignOutButton /><a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a></div></header>
+        <header className="admin-topbar">
+          <div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>{current.label}</strong></div>
+          <div className="topbar-actions"><span className="preview-chip">FRONT-END PREVIEW</span><button type="button" className="topbar-button" onClick={() => openScreen('overview')}>Dashboard home</button><a href="https://www.vendrahub.com/" target="_blank" rel="noreferrer">Storefront ↗</a></div>
+        </header>
+
         <div className="admin-content">
-          <section id="overview" className="admin-welcome"><div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Good day. <span>Here is your store overview.</span></h1><p>Your administration workspace. Live business figures will appear when authenticated data services are connected.</p></div><div className="welcome-date">VENDRAHUB<br/><strong>ADMINISTRATION</strong></div></section>
+          {notice && <div className="preview-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss message">×</button></div>}
 
-          <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Protected owner workspace — operational integrations remain read-only</strong><p>Only the verified owner session with authenticator-based MFA can access this console. Supplier purchases, imports, live inventory changes, payments and fulfilment actions remain disabled.</p></div></div>
+          {active === 'overview' ? (
+            <>
+              <section className="admin-welcome">
+                <div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Welcome to VendraHub <span>administration.</span></h1><p>Explore the dashboard and every administration screen. All business data below is illustrative placeholder content.</p></div>
+                <div className="welcome-date">ADMIN WORKSPACE<br/><strong>PREVIEW MODE</strong></div>
+              </section>
+              <div className="admin-alert"><span className="alert-icon">i</span><div><strong>Front-end preview — no backend data is connected to this dashboard</strong><p>Navigation and preview controls work. Products, orders, customer information, inventory, sales and supplier records are placeholders. No store changes or messages are sent.</p></div></div>
+              <div className="admin-metrics">
+                {[['Total products','—','Placeholder · awaiting connection'],['Orders today','—','Placeholder · awaiting connection'],['Customers','—','Placeholder · awaiting connection'],['Sales & profit','—','No financial figures displayed']].map(metric => <article className="metric-card" key={metric[0]}><span>{metric[0]}</span><strong>{metric[1]}</strong><small>{metric[2]}</small></article>)}
+              </div>
+              <div className="overview-grid">
+                <article className="admin-card"><div className="card-heading"><div><h3>Store activity</h3><p>Activity timeline preview</p></div><span className="muted-tag">DEMO</span></div><div className="activity-placeholder"><div><b>01</b><span><strong>Admin workspace prepared</strong><small>Navigation and screen layout available</small></span></div><div><b>02</b><span><strong>Backend connection pending</strong><small>Live store data will appear in a later phase</small></span></div><div><b>03</b><span><strong>Operations remain disabled</strong><small>No product, order, payment or inventory changes</small></span></div></div></article>
+                <article className="admin-card"><div className="card-heading"><div><h3>Workspace readiness</h3><p>Front-end modules</p></div><span className="muted-tag">PREVIEW</span></div><ul className="readiness-list">{navigation.slice(1).map(item => <li key={item.id}><span>{item.label}</span><b className="state">Preview available</b></li>)}</ul></article>
+              </div>
+              <section className="admin-section"><div className="section-heading"><p className="admin-kicker">QUICK ACCESS</p><h2>Open a workspace</h2><p>Choose a section to inspect its layout and placeholder controls.</p></div><div className="quick-access-grid">{navigation.slice(1, 7).map(item => <button type="button" className="quick-access-button" key={item.id} onClick={() => openScreen(item.id)}><span>{item.label}</span><b>Open →</b></button>)}</div></section>
+            </>
+          ) : active === 'suppliers' ? (
+            <>
+              <section className="admin-welcome"><div><p className="admin-kicker">SOURCING WORKSPACE</p><h1>Supplier connections</h1><p>Compare the supplier connection areas. No accounts are connected and no supplier actions are performed here.</p></div></section>
+              <div className="admin-alert"><span className="alert-icon">i</span><div><strong>Supplier integrations are placeholders</strong><p>Official supplier pages are provided for reference. Opening them will leave the admin preview; authorisation and purchases are not initiated here.</p></div></div>
+              <div className="supplier-grid">
+                {[
+                  {name:'Syncee',desc:'Product discovery, supplier catalogue and Shopify app connection.',url:'https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store'},
+                  {name:'DSers',desc:'Supplier sourcing and order workflow through the Shopify app.',url:'https://help.dsers.com/link-shopify-store/'},
+                  {name:'CJdropshipping',desc:'Supplier catalogue and optional direct API integration.',url:'https://developers.cjdropshipping.com/en/api/start/apikey.html'},
+                ].map(s => <article className="admin-card supplier-card" key={s.name}><div className="supplier-title"><div><h3>{s.name}</h3><small>Not connected · preview only</small></div><span className="state">PLACEHOLDER</span></div><p>{s.desc}</p><div className="supplier-links"><a href={s.url} target="_blank" rel="noreferrer">Read official guide ↗</a><button type="button" onClick={() => showPlaceholder(s.name + ' connection will be configured after backend integration.')}>Connection details</button></div></article>)}
+              </div>
+            </>
+          ) : (
+            <>
+              <section className="admin-welcome"><div><p className="admin-kicker">VENDRAHUB MANAGEMENT</p><h1>{screenCopy[active].title}</h1><p>{screenCopy[active].subtitle}</p></div><div className="welcome-date">SCREEN {String(currentIndex + 1).padStart(2, '0')}<br/><strong>PREVIEW MODE</strong></div></section>
+              <div className="admin-alert"><span className="alert-icon">i</span><div><strong>{screenCopy[active].title} is a front-end placeholder</strong><p>{screenCopy[active].description}</p></div></div>
+              <div className="preview-card-grid">{screenCopy[active].cards.map(card => <PlaceholderCard key={card.title} title={card.title} detail={card.detail} onPreview={() => showPlaceholder(card.title + ': this screen is a visual placeholder. Backend connection is intentionally disabled.')}/>)}</div>
+            </>
+          )}
 
-          <div className="admin-metrics">
-            {[
-              { label: 'Support requests', value: String(ticketsResult.count ?? 0), note: 'Customer tickets in Supabase' },
-              { label: 'Supplier records', value: String(supplierCount), note: 'Connection state only; not connected' },
-              { label: 'Audit events', value: String(auditResult.count ?? 0), note: 'Recorded privileged events' },
-              { label: 'Live operations', value: 'Paused', note: 'Purchases, imports and payments disabled' },
-            ].map(metric => <article className="metric-card" key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.note}</small></article>)}
-          </div>
-
-          <div className="overview-grid">
-            <article className="admin-card"><div className="card-heading"><div><h3>Business activity</h3><p>Sales and order activity will display here</p></div><span className="muted-tag">NO DATA</span></div><EmptyState title="Analytics not connected" detail="Connect authenticated Shopify and reporting services to populate this area." /></article>
-            <article className="admin-card"><div className="card-heading"><div><h3>Launch readiness</h3><p>Current implementation checkpoints</p></div></div><ul className="readiness-list"><li><span>Admin authentication</span><b className="state state-warning">Owner MFA enforced</b></li><li><span>Database and access policies</span><b className="state state-warning">RLS enabled</b></li><li><span>Shopify Admin API</span><b className="state">Not verified</b></li><li><span>Supplier connections</span><b className="state">Pending</b></li><li><span>Live operations</span><b className="state state-paused">Disabled</b></li></ul></article>
-          </div>
-
-          <Section id="products" title="Products" description="Catalogue, variants, pricing, product approval and publication.">
-            <div className="admin-card"><div className="card-heading"><div><h3>Product catalogue</h3><p>Product data is not yet connected to an authenticated admin service.</p></div><span className="muted-tag">READINESS ONLY</span></div><EmptyState title="No admin catalogue loaded" detail="The existing storefront product endpoint is read-only. Product imports and publishing remain disabled pending approval." /></div>
-          </Section>
-
-          <Section id="orders" title="Orders" description="Order review, status, payment reconciliation, returns and fulfilment.">
-            <div className="admin-card"><div className="card-heading"><h3>Order management</h3><span className="state state-paused">Live actions disabled</span></div><EmptyState title="Order management is not connected" detail="Connect a properly authorised Shopify Admin API service before displaying or changing live orders." /></div>
-          </Section>
-
-          <Section id="customers" title="Customers" description="Customer profiles, order history, support context and privacy requests.">
-            <div className="admin-card"><EmptyState title="Customer data is not connected" detail="Customer information will only be available through appropriately scoped, authenticated Shopify access." /></div>
-          </Section>
-
-          <Section id="suppliers" title="Supplier connections" description="Compare suppliers, inspect connection health and review sourcing options.">
-            <div className="supplier-grid">{suppliers.map(s => { const code = s.name === 'CJdropshipping' ? 'cjdropshipping' : s.name.toLowerCase(); const currentStatus = supplierStatuses.get(code) ?? 'not_connected'; return <article className="admin-card supplier-card" key={s.name}><div className="supplier-title"><div><h3>{s.name}</h3><small>{s.method}</small></div><span className="state">{currentStatus.replaceAll('_', ' ')}</span></div><p>{s.detail}</p><div className="supplier-links"><a href={s.url} target="_blank" rel="noreferrer">Open connection page ↗</a><a href={s.docs} target="_blank" rel="noreferrer">Official guide ↗</a></div></article>; })}</div>
-            <div className="admin-note"><strong>Supplier operating policy</strong><p>Compare all three before selecting a primary supplier. Product imports, paid plans, supplier purchases, live stock changes and supplier order submission remain disabled until separately approved.</p></div>
-          </Section>
-
-          <Section id="inventory" title="Inventory & fulfilment" description="Supplier stock, SKU mapping, delivery estimates and shipment tracking.">
-            <div className="admin-card"><EmptyState title="Inventory synchronisation is not active" detail="No live stock changes or automatic fulfilment are enabled. Supplier data must be verified before use." /></div>
-          </Section>
-
-          <Section id="finance" title="Sales & profit" description="Revenue, supplier costs, shipping, fees, refunds and currency reporting.">
-            <div className="admin-card"><EmptyState title="Financial reporting awaits verified data" detail="No sales or profit figures are fabricated. Reports require reconciled Shopify and supplier cost data." /></div>
-          </Section>
-
-          <Section id="support" title="Customer support" description="Enquiries, returns, complaints, ticket ownership and resolution history.">
-            <div className="admin-card"><EmptyState title="Support inbox not connected" detail="A support channel and ticket storage service are required before customer conversations can appear here." /></div>
-          </Section>
-
-          <Section id="assistant" title="AI operations assistant" description="Research, compare, explain and prepare actions for administrator review.">
-            <div className="admin-card"><div className="card-heading"><h3>AI assistance policy</h3><span className="state state-paused">Approval required</span></div><ul className="feature-list"><li>Supplier comparison and sourcing summaries</li><li>Draft product descriptions and catalogue recommendations</li><li>Sales explanations and operational anomaly summaries</li><li>Prepare changes for human review</li></ul><p className="admin-footnote">AI does not independently import products, purchase subscriptions, place supplier orders, change live inventory or issue refunds.</p></div>
-          </Section>
-
-          <Section id="staff" title="Staff & access" description="Administrator identity, staff roles, permissions and audit history.">
-            <div className="admin-card"><EmptyState title="Owner access protected" detail="Owner access is checked server-side; verified email and AAL2 MFA are required. Staff roles remain disabled until explicitly configured." /></div>
-          </Section>
-
-          <Section id="notifications" title="Notifications" description="Order events, supplier errors, stock alerts, payment events and security notices.">
-            <div className="admin-card"><EmptyState title="Notification services not connected" detail="Notifications require verified event sources, delivery configuration and retry handling." /></div>
-          </Section>
-
-          <Section id="reports" title="Reports & analytics" description="Sales by period, country, product, supplier, returns and fulfilment performance.">
-            <div className="admin-card"><EmptyState title="No verified reports available" detail="Reporting will be enabled after data ingestion, currency handling and reconciliation are implemented." /></div>
-          </Section>
-
-          <Section id="settings" title="Settings & system health" description="Store configuration, integration settings, security and operational diagnostics.">
-            <div className="settings-grid"><article className="admin-card"><h3>Store configuration</h3><p>Store domain</p><strong>vendrahub-store.myshopify.com</strong><p>Reporting base currency</p><strong>NGN · subject to Shopify configuration verification</strong></article><article className="admin-card"><h3>Security controls</h3><ul className="feature-list"><li>Keep API secrets server-side only</li><li>Enforce admin authentication before production</li><li>Use least-privilege API scopes</li><li>Log privileged actions</li><li>Back up data and test restoration</li></ul></article></div>
-          </Section>
-
-          <footer className="admin-footer"><span>VendraHub · Admin workspace</span><span>Black · White · Gold</span></footer>
+          <footer className="admin-footer"><span>VendraHub · Administration</span><span>Black · White · Gold · Preview only</span><button type="button" onClick={() => openScreen('overview')}>Return to dashboard ↑</button></footer>
         </div>
       </div>
     </main>
