@@ -1,12 +1,12 @@
 # VendraHub
 
-VendraHub is a Next.js commerce starter with separate admin and customer experience routes, plus a Capacitor Android packaging scaffold.
+VendraHub is a Next.js commerce application with separate admin and customer routes, plus a Capacitor Android packaging scaffold.
 
 ## Supabase application connection
 
-The connected Supabase project is VendraHub (szishzerqvbdvhmysqpv) in eu-west-1. Its project URL is prefilled in .env.example; add the project's publishable key to your local environment or hosting configuration. The publishable key is designed for browser use, but database access must still be protected with Row Level Security (RLS). Never place a Supabase secret/service-role key in browser code or a NEXT_PUBLIC_ variable.
+The connected Supabase project is VendraHub (`szishzerqvbdvhmysqpv`) in `eu-west-1`. Its project URL is prefilled in `.env.example`; add the project's publishable key to the deployment environment. The publishable key is designed for browser use, but database access must still be protected with Row Level Security (RLS). Never place a Supabase secret/service-role key in browser code or a `NEXT_PUBLIC_*` variable.
 
-The Supabase project is currently a clean database with no application tables or migrations. The Next.js application integration (SSR auth clients, session handling, schema and RLS policies) is not yet implemented. Do not treat the admin preview as authenticated until that work is complete and tested.
+The current database includes `profiles`, `support_tickets`, `wishlist_items`, `supplier_connections`, `store_settings`, `audit_events`, and `customer_addresses`. RLS is enabled on these public tables and the schema is tracked by Supabase migrations. Admin access is gated by the Supabase session, verified owner identity, and AAL2 authenticator MFA in middleware and corresponding owner-only database policies. The owner identity is pinned consistently in the application and database policies; changing it requires a coordinated code and policy update followed by an access-control test.
 
 ## Shopify storefront connection
 
@@ -23,6 +23,12 @@ npm run dev
 ```
 
 The storefront will then be available at `http://localhost:3000/customer`. `GET /api/products` returns a bounded product list and never returns credentials. The app fails closed with a configuration message if the token is not set.
+
+## Admin integration status
+
+The admin route has owner-only Supabase authentication and MFA gating. Its current workspace is an initial, responsive control-centre shell. The overview reads the existing support-ticket, audit-event, and supplier-connection records from Supabase.
+
+Products, orders, customer administration, inventory, sales/profit reporting, support inbox, notifications, and AI operations are not yet connected to a Shopify Admin API or equivalent live data service. Those panels are intentionally shown as not connected rather than inventing business data. A separate server-side Shopify Admin API integration with merchant-authorised OAuth and least-privilege scopes is required before those modules can display or modify live Shopify data. Do not reuse the Storefront API token as an Admin API token.
 
 ## Supplier connections
 
@@ -45,13 +51,15 @@ The admin page reports whether the optional `CJ_API_KEY` environment variable is
 - Product imports require explicit product-level approval.
 - Paid supplier plans, supplier purchases, live inventory updates, order submission and fulfilment automation remain disabled.
 - Do not expose supplier credentials through client components, API responses, logs, or `NEXT_PUBLIC_*` variables.
-- The admin page is currently a development preview, not an authenticated production admin boundary.
-- Shopify Admin API operations require a separately authenticated and authorised server-side app. Do not reuse a Storefront API token as an Admin API token.
+- Keep the admin owner identity and database RLS policies in sync.
+- Never expose a Shopify Admin API token to browser code.
 
 ## Routes
 
 - `/` — VendraHub landing page
-- `/admin` — admin workspace preview (not production-authenticated)
+- `/admin` — owner-authenticated admin workspace
+- `/admin/login` — owner sign-in
+- `/admin/mfa` — authenticator MFA challenge/enrolment
 - `/customer` — read-only Shopify product storefront
 - `/api/products` — server-side Shopify product search (`q` optional, `limit` capped at 20)
 
