@@ -70,6 +70,15 @@ const screenCopy: Record<Exclude<ScreenId, 'overview'>, { title: string; subtitl
       { title: 'Campaign performance', detail: 'Verified redemption and sales data will appear after integration.' },
     ],
   },
+  suppliers: {
+    title: 'Suppliers & dropshipping', subtitle: 'Supplier sourcing and fulfilment connections',
+    description: 'Supplier connections are placeholders. No supplier accounts are connected and no supplier actions are performed here.',
+    cards: [
+      { title: 'Syncee', detail: 'Supplier discovery and catalogue connection. Review the official Shopify setup before authorising.' },
+      { title: 'DSers', detail: 'Supplier sourcing and order workflow. No orders are placed from this preview.' },
+      { title: 'CJdropshipping', detail: 'Supplier catalogue and API integration information. No account is connected.' },
+    ],
+  },
   finance: {
     title: 'Sales & profit', subtitle: 'Revenue, costs and margin reporting',
     description: 'No financial figures are fabricated. Verified sales, fees, supplier costs and shipping data will populate this screen later.',
