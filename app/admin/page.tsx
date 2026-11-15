@@ -168,6 +168,9 @@ export default function AdminPage() {
   const [notice, setNotice] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantPrompt, setAssistantPrompt] = useState('');
+  const [assistantNotice, setAssistantNotice] = useState('');
 
   const filteredNavigation = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -247,7 +250,16 @@ export default function AdminPage() {
             <>
               <section className="admin-welcome dashboard-welcome">
                 <div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Dashboard</h1><p>Your VendraHub activity at a glance.</p></div>
-                <button type="button" className="dashboard-ai-button" onClick={() => openScreen('assistant')}><span aria-hidden="true">✧</span><span><strong>AI assistant</strong><small>Open your AI workspace</small></span><b>→</b></button>
+                <div className="dashboard-ai-wrap">
+                  <button type="button" className={`dashboard-ai-button${assistantOpen ? ' is-open' : ''}`} onClick={() => { setAssistantOpen(value => !value); setAssistantNotice(''); }} aria-expanded={assistantOpen} aria-controls="dashboard-ai-panel"><span aria-hidden="true">✧</span><span><strong>Ask AI</strong><small>{assistantOpen ? 'Close assistant' : 'Quick assistant'}</small></span><b>{assistantOpen ? '×' : '↗'}</b></button>
+                  {assistantOpen && <section className="dashboard-ai-panel" id="dashboard-ai-panel" aria-label="Quick AI assistant">
+                    <div className="dashboard-ai-panel-heading"><div><strong>VendraHub AI assistant</strong><small>Quick help from your dashboard</small></div><button type="button" onClick={() => { setAssistantOpen(false); setAssistantNotice(''); }} aria-label="Close AI assistant">×</button></div>
+                    <label className="dashboard-ai-input-label" htmlFor="dashboard-ai-prompt">What would you like help with?</label>
+                    <textarea id="dashboard-ai-prompt" value={assistantPrompt} onChange={event => setAssistantPrompt(event.target.value)} placeholder="Ask about products, orders, suppliers or store operations..." rows={3} />
+                    <div className="dashboard-ai-panel-footer"><span>Preview · AI responses not connected</span><button type="button" onClick={() => setAssistantNotice(assistantPrompt.trim() ? 'Your question is saved in this preview. AI responses will be enabled after the approved service is connected.' : 'Enter a question first.')}>Send</button></div>
+                    {assistantNotice && <p className="dashboard-ai-notice" role="status">{assistantNotice}</p>}
+                  </section>}
+                </div>
               </section>
               <section className="admin-card dashboard-activity" aria-labelledby="activity-title">
                 <div className="card-heading"><div><h3 id="activity-title">Recent activity</h3><p>Updates and events from your store workspace</p></div><span className="muted-tag">ACTIVITY</span></div>
