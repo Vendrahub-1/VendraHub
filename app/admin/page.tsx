@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
+import PricingCalculator from '@/components/admin/pricing-calculator';
 import { createClient } from '@/lib/supabase/server';
 
 const suppliers = [
@@ -86,7 +87,7 @@ export default async function AdminPage() {
           </Section>
 
           <Section id="finance" title="Sales & profit" description="Revenue, supplier costs, shipping, fees, refunds and currency reporting.">
-            <div className="admin-card"><EmptyState title="Financial reporting awaits verified data" detail="No sales or profit figures are fabricated. Reports require reconciled Shopify and supplier cost data." /></div>
+            <PricingCalculator />
           </Section>
 
           <Section id="support" title="Customer support" description="Enquiries, returns, complaints, ticket ownership and resolution history.">
