@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://vendrahub.com",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
@@ -14,7 +14,10 @@ function json(body: Record<string, unknown>, status = 200) {
 }
 
 function readClaims(req: Request): Record<string, unknown> | null {
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\\s+/i, "");
+  const authorization = req.headers.get("Authorization") ?? "";
+  const token = authorization.toLowerCase().startsWith("bearer ")
+    ? authorization.slice(7).trim()
+    : authorization.trim();
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   try {
@@ -59,10 +62,10 @@ Deno.serve(async (req: Request) => {
   try {
     const allowlistUrl = new URL("/rest/v1/admin_allowlist", url);
     allowlistUrl.searchParams.set("select", "enabled");
-    allowlistUrl.searchParams.set("email", `eq.${email}`);
+    allowlistUrl.searchParams.set("email", "eq." + email);
     allowlistUrl.searchParams.set("limit", "1");
     const allowlistResponse = await fetch(allowlistUrl, {
-      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+      headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey },
       signal: AbortSignal.timeout(8000),
     });
     if (!allowlistResponse.ok) return json({ ok: false, error: "admin_allowlist_check_failed" }, 503);
@@ -82,16 +85,17 @@ Deno.serve(async (req: Request) => {
     "PRINTFUL_API_TOKEN",
   ];
   const secrets = Object.fromEntries(names.map((name) => [name, Boolean(Deno.env.get(name)?.trim())]));
-  const domain = Deno.env.get("SHOPIFY_STORE_DOMAIN")?.trim() ?? "";
-  const normalizedDomain = domain.replace(/^https?:\\/\\//, "").replace(/\\/$/, "");
-  const domainValid = /^[a-zA-Z0-9][a-zA-Z0-9-]*\\.myshopify\\.com$/.test(normalizedDomain);
+  let domain = Deno.env.get("SHOPIFY_STORE_DOMAIN")?.trim() ?? "";
+  domain = domain.replace("https://", "").replace("http://", "");
+  while (domain.endsWith("/")) domain = domain.slice(0, -1);
+  const domainValid = domain.endsWith(".myshopify.com") && !domain.includes(" ");
 
   return json({
     ok: true,
     checked_at: new Date().toISOString(),
     project: "VendraHub",
     secrets,
-    shopify_domain_valid: secrets.SHOPIFY_STORE_DOMAIN && domainValid,
+    shopify_domain_valid: Boolean(secrets.SHOPIFY_STORE_DOMAIN && domainValid),
     supabase_server_key_available: Boolean(serviceKey),
     values_exposed: false,
   });
