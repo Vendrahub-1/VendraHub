@@ -137,26 +137,31 @@ async function cjCatalogue(query: string, page: number) {
     signal: AbortSignal.timeout(15000),
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload?.code !== 200 || payload?.success !== true) {
+  if (!response.ok || payload?.code !== 200 || payload?.result !== true || payload?.success !== true) {
     throw new Error("cj_catalogue_request_failed");
   }
-  const raw = Array.isArray(payload?.data?.list) ? payload.data.list
-    : Array.isArray(payload?.data) ? payload.data : [];
+  const groups = Array.isArray(payload?.data?.content) ? payload.data.content : [];
+  const raw = groups.flatMap((group: Record<string, unknown>) =>
+    Array.isArray(group.productList) ? group.productList : []
+  );
   return {
     products: raw.map((p: Record<string, unknown>) => ({
       supplier: "cjdropshipping",
-      id: String(p.pid ?? p.productId ?? ""),
-      title: String(p.productNameEn ?? p.productName ?? "CJ product"),
-      image: typeof p.productImage === "string" ? p.productImage : null,
-      sku: typeof p.productSku === "string" ? p.productSku : null,
-      cost: p.sellPrice ?? p.productPrice ?? null,
+      id: String(p.id ?? ""),
+      title: String(p.nameEn ?? "CJ product"),
+      image: typeof p.bigImage === "string" ? p.bigImage : null,
+      sku: typeof p.sku === "string" ? p.sku : null,
+      cost: p.nowPrice ?? p.sellPrice ?? null,
       currency: "USD",
-      category: p.categoryName ?? null,
-      delivery_time_hours: p.deliveryTime ?? null,
+      category: p.threeCategoryName ?? p.twoCategoryName ?? null,
+      inventory: p.totalVerifiedInventory ?? p.warehouseInventoryNum ?? null,
+      free_shipping: p.addMarkStatus === 1,
+      delivery_cycle_days: p.deliveryCycle ?? null,
       source: "CJdropshipping catalogue",
     })),
     page,
     page_size: 20,
+    total_records: payload?.data?.totalRecords ?? null,
     open_id_present: auth.openIdPresent,
   };
 }
