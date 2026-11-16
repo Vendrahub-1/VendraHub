@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CheckoutButton from '@/components/storefront/checkout-button';
 import {
   searchShopifyProducts,
   ShopifyConfigurationError,
@@ -64,13 +65,14 @@ export default async function CustomerPage() {
               <span className={product.availableForSale ? 'availability available' : 'availability'}>
                 {product.availableForSale ? 'Available' : 'Sold out'}
               </span>
+              <CheckoutButton variantId={product.variantId} available={product.availableForSale} />
             </div>
           </article>
         ))}
       </section>
 
       <p className="storefront-note">
-        Product information is read-only. Checkout, customer accounts, and order history are not connected in this initial integration.
+        Checkout opens Shopify's secure hosted checkout. Payment confirmation, customer accounts, and order history remain managed by Shopify until their webhook and account integrations are configured.
       </p>
     </main>
   );
