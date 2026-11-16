@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCjProductAndShippingQuote } from '@/lib/cj-dropshipping';
+import { getExchangeRates } from '@/lib/exchange-rates';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,18 @@ export async function POST(request: Request) {
       destinationCountryCode: (body.destinationCountryCode ?? '').toUpperCase(),
       quantity: body.quantity ?? 1,
     });
-    return NextResponse.json({ quote, productImported: false, orderPlaced: false }, {
+    const rates = await getExchangeRates('USD');
+    const usdToNgn = rates.rates.NGN;
+    const quoteWithNgn = {
+      ...quote,
+      supplierCostNgn: Math.round(quote.supplierCostUsd * usdToNgn * 100) / 100,
+      shippingOptions: quote.shippingOptions.map(option => ({
+        ...option,
+        shippingCostNgn: Math.round(option.shippingCostUsd * usdToNgn * 100) / 100,
+      })),
+      exchangeRate: { from: 'USD', to: 'NGN', rate: usdToNgn, fetchedAt: rates.fetchedAt },
+    };
+    return NextResponse.json({ quote: quoteWithNgn, productImported: false, orderPlaced: false }, {
       headers: { 'Cache-Control': 'private, no-store' },
     });
   } catch (error) {
