@@ -228,7 +228,7 @@ Deno.serve(async (req: Request) => {
     const clean = variants.map((v: Record<string, unknown>) => {
       const item: Record<string, unknown> = { id: String(v.id ?? "") };
       if (typeof v.price === "string" && /^\d+(\.\d{1,2})?$/.test(v.price)) item.price = v.price;
-      if (typeof v.sku === "string") item.inventoryItem = undefined, item.sku = v.sku.slice(0, 100);
+      if (typeof v.sku === "string") item.sku = v.sku.slice(0, 100);
       return item;
     });
     if (clean.some((v: Record<string, unknown>) => !String(v.id).startsWith("gid://shopify/ProductVariant/") || Object.keys(v).length < 2)) {
