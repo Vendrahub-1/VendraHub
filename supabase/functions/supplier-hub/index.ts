@@ -80,6 +80,16 @@ async function updateConnection(
 ) {
   const target = new URL("/rest/v1/supplier_connections", auth.supabaseUrl);
   target.searchParams.set("supplier_code", "eq." + supplier);
+  target.searchParams.set("select", "metadata");
+  const currentResponse = await fetch(target, {
+    headers: { apikey: auth.serviceKey, Authorization: "Bearer " + auth.serviceKey },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!currentResponse.ok) throw new Error("connection_state_read_failed");
+  const currentRows = await currentResponse.json();
+  const currentMetadata = Array.isArray(currentRows) && currentRows[0]?.metadata && typeof currentRows[0].metadata === "object"
+    ? currentRows[0].metadata
+    : {};
   const response = await fetch(target, {
     method: "PATCH",
     headers: {
@@ -92,7 +102,7 @@ async function updateConnection(
       connection_status: "connected",
       integration_method: "direct_api",
       last_checked_at: new Date().toISOString(),
-      metadata,
+      metadata: { ...currentMetadata, ...metadata },
     }),
     signal: AbortSignal.timeout(8000),
   });
@@ -182,6 +192,54 @@ async function printfulCatalogue(query: string) {
   return { products: products.slice(0, 50), total_matches: products.length, catalogue_total: all.length };
 }
 
+
+async function shopifyCatalogue(query: string) {
+  let domain = Deno.env.get("SHOPIFY_STORE_DOMAIN")?.trim() ?? "";
+  const token = Deno.env.get("SHOPIFY_ADMIN_ACCESS_TOKEN")?.trim();
+  const version = Deno.env.get("SHOPIFY_ADMIN_API_VERSION")?.trim() || "2026-10";
+  domain = domain.replace("https://", "").replace("http://", "");
+  while (domain.endsWith("/")) domain = domain.slice(0, -1);
+  if (!domain || !domain.endsWith(".myshopify.com") || domain.includes(" ") || !token) {
+    throw new Error("shopify_admin_configuration_missing");
+  }
+  const safeQuery = query.replace(/[^a-zA-Z0-9 _-]/g, " ").trim().slice(0, 100);
+  const search = safeQuery ? "title:" + safeQuery : null;
+  const response = await fetch("https://" + domain + "/admin/api/" + version + "/graphql.json", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": token },
+    body: JSON.stringify({
+      query: `query SupplierHubStoreProducts($first: Int!, $search: String) {
+        products(first: $first, query: $search, sortKey: UPDATED_AT, reverse: true) {
+          nodes { id title vendor productType status featuredImage { url altText } }
+          pageInfo { hasNextPage endCursor }
+        }
+      }`,
+      variables: { first: 25, search },
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload?.errors?.length || !payload?.data?.products) {
+    throw new Error(response.status === 401 || response.status === 403 ? "shopify_auth_or_read_products_scope_error" : "shopify_catalogue_request_failed");
+  }
+  return {
+    products: (payload.data.products.nodes ?? []).map((p: Record<string, unknown>) => ({
+      supplier: "shopify",
+      id: String(p.id ?? ""),
+      title: String(p.title ?? "Shopify product"),
+      image: typeof (p.featuredImage as Record<string, unknown> | null)?.url === "string" ? (p.featuredImage as Record<string, unknown>).url : null,
+      sku: null,
+      cost: null,
+      currency: null,
+      category: p.productType ?? p.vendor ?? null,
+      status: p.status ?? null,
+      source: "Shopify store catalogue; may include products imported by Syncee or DSers",
+    })),
+    page_info: payload.data.products.pageInfo,
+    source_note: "Shopify products are visible here after a supplier app imports them. Supplier origin is not inferred unless the product metadata identifies it.",
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "GET") return json({ ok: false, error: "method_not_allowed" }, 405);
@@ -216,6 +274,16 @@ Deno.serve(async (req: Request) => {
       })) : [],
       credentials_exposed: false,
     });
+  }
+
+  if (action === "shopify-catalogue") {
+    try {
+      const catalogue = await shopifyCatalogue(query);
+      return json({ ok: true, supplier: "shopify", query, ...catalogue, import_enabled: false, publish_enabled: false });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "shopify_catalogue_unavailable";
+      return json({ ok: false, supplier: "shopify", error: message }, message.includes("configuration_missing") ? 503 : 502);
+    }
   }
 
   if (supplier !== "cjdropshipping" && supplier !== "printful") {
