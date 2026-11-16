@@ -12,6 +12,7 @@ export type StorefrontProduct = {
   imageAlt: string | null;
   price: string;
   currencyCode: string;
+  variantId: string | null;
 };
 
 type ShopifyProductsResponse = {
@@ -27,6 +28,7 @@ type ShopifyProductsResponse = {
         priceRange: {
           minVariantPrice: { amount: string; currencyCode: string };
         };
+        variants: { nodes: Array<{ id: string }> };
       }>;
     };
   };
@@ -44,6 +46,7 @@ const PRODUCTS_QUERY = `
         availableForSale
         featuredImage { url altText }
         priceRange { minVariantPrice { amount currencyCode } }
+        variants(first: 1) { nodes { id } }
       }
     }
   }
@@ -97,5 +100,6 @@ export async function searchShopifyProducts(
     imageAlt: product.featuredImage?.altText ?? null,
     price: product.priceRange.minVariantPrice.amount,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
+    variantId: product.variants.nodes[0]?.id ?? null,
   }));
 }
