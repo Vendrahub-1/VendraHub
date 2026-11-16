@@ -187,3 +187,24 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 .customer-empty { padding:15px; border:1px dashed #ddd8ca; border-radius:10px; font-size:12px; }
 .customer-notice { margin:0 0 14px; padding:11px 13px; border-radius:8px; background:#eef8f1; color:#21643b; font-size:12px; }
 @media(max-width:650px) { .customer-section { padding:17px; } .customer-form-grid,.customer-card-grid { grid-template-columns:1fr; } .customer-nav { position:relative; top:auto; } }
+
+
+.pricing-form { display: grid; gap: 18px; }
+.pricing-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pricing-field { display: grid; gap: 7px; color: #222; font-size: 13px; font-weight: 600; }
+.pricing-field input, .pricing-field select { width: 100%; min-height: 42px; border: 1px solid #d7d7d7; border-radius: 8px; padding: 9px 11px; background: #fff; color: #111; font: inherit; }
+.pricing-field small { color: #777; font-size: 11px; font-weight: 400; }
+.pricing-form button { justify-self: start; border: 0; border-radius: 8px; padding: 12px 18px; background: #c9a227; color: #111; font-weight: 700; cursor: pointer; }
+.pricing-form button:disabled { opacity: .6; cursor: wait; }
+.pricing-error { color: #b42318; font-size: 13px; }
+.pricing-results { display: grid; gap: 16px; margin-top: 22px; padding-top: 20px; border-top: 1px solid #eee; }
+.pricing-result-main { display: grid; gap: 5px; padding: 18px; border-radius: 10px; background: #111; color: #fff; }
+.pricing-result-main span, .pricing-result-grid span { font-size: 12px; color: #aaa; }
+.pricing-result-main strong { color: #e2c15d; font-size: 28px; }
+.pricing-result-main small { color: #ccc; }
+.pricing-result-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pricing-result-grid > div { display: grid; gap: 6px; padding: 14px; border: 1px solid #eee; border-radius: 8px; }
+.pricing-result-grid span { color: #777; }
+.pricing-result-grid strong { font-size: 15px; color: #171717; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .pricing-fields, .pricing-result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .pricing-fields, .pricing-result-grid { grid-template-columns: 1fr; } }
