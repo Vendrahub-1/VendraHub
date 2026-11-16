@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
 type Result = {
   currency: string;
@@ -40,7 +40,7 @@ export default function PricingCalculator() {
     setForm(current => ({ ...current, [key]: value }));
   }
 
-  async function calculate(event: React.FormEvent<HTMLFormElement>) {
+  async function calculate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError('');
