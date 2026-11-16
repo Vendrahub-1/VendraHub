@@ -22,7 +22,7 @@ const suppliers: Supplier[] = [
   { code: 'printful', name: 'Printful', method: 'Shopify app + direct API', detail: 'Use the Shopify app for store linking. A valid server-side Printful API token enables VendraHub catalogue browsing.', installUrl: 'https://apps.shopify.com/printful', docsUrl: 'https://developers.printful.com/docs/', directApi: true },
 ];
 
-export default function SupplierHubPanel({ initialStatuses }: { initialStatuses: Record<string, string> }) {
+export default function SupplierHubPanel({ initialStatuses, mode = 'all' }: { initialStatuses: Record<string, string>; mode?: 'all' | 'connections' | 'catalogue' }) {
   const [statuses, setStatuses] = useState<Record<string, SupplierStatus>>(
     Object.fromEntries(Object.entries(initialStatuses).map(([key, value]) => [key, { connection_status: value }]))
   );
@@ -94,11 +94,11 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
   }
 
   return <div className="supplier-hub">
-    <div className="supplier-hub-intro">
+    {mode !== 'catalogue' && <div className="supplier-hub-intro">
       <div><strong>Supplier connection centre</strong><p>Install the supplier app in Shopify, verify supported API credentials, then browse catalogue data. Credentials stay on the server.</p></div>
       <button type="button" className="supplier-refresh" onClick={() => void refreshStatuses()} disabled={busy !== null}>Refresh status</button>
-    </div>
-    <div className="supplier-grid">
+    </div>}
+    {mode !== 'catalogue' && <div className="supplier-grid">
       {suppliers.map((supplier) => {
         const status = statuses[supplier.code]?.connection_status ?? 'not_connected';
         return <article className="admin-card supplier-card" key={supplier.code}>
@@ -113,8 +113,8 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
             : <p className="supplier-app-note">App authorisation is completed in Shopify. Direct VendraHub API catalogue search is not currently available for this supplier.</p>}
         </article>;
       })}
-    </div>
-    <div className="admin-card supplier-catalogue">
+    </div>}
+    {mode !== 'connections' && <div className="admin-card supplier-catalogue">
       <div className="card-heading"><div><h3>Supplier catalogue browser</h3><p>Search direct supplier catalogues or products already imported into Shopify. Syncee and DSers private catalogues remain inside their apps.</p></div><span className="muted-tag">READ ONLY</span></div>
       <div className="supplier-search">
         <label htmlFor="supplier-select">Supplier</label>
@@ -135,12 +135,15 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
           <div className="supplier-product-info"><strong>{product.title}</strong><small>{product.category ?? 'Uncategorised'}{product.sku ? ' · SKU ' + product.sku : ''}</small>
             <small>{product.cost !== null && product.cost !== undefined ? 'Supplier cost: ' + product.cost + ' ' + (product.currency ?? '') : 'Supplier cost: not supplied in this catalogue response'}</small>
             {product.variant_count ? <small>{product.variant_count} variants</small> : null}
-            {product.inventory !== null && product.inventory !== undefined ? <small>Verified stock reported: {product.inventory}</small> : null}\n            {product.free_shipping ? <small>Supplier marks this listing as free shipping</small> : null}\n            {product.delivery_cycle_days ? <small>Supplier delivery cycle: {product.delivery_cycle_days} days (estimate)</small> : null}\n            {product.status ? <small>Shopify status: {product.status}</small> : null}
+            {product.inventory !== null && product.inventory !== undefined ? <small>Verified stock reported: {product.inventory}</small> : null}
+            {product.free_shipping ? <small>Supplier marks this listing as free shipping</small> : null}
+            {product.delivery_cycle_days ? <small>Supplier delivery cycle: {product.delivery_cycle_days} days (estimate)</small> : null}
+            {product.status ? <small>Shopify status: {product.status}</small> : null}
           </div>
           <span className="state">Not imported</span>
         </article>)}
       </div>}
       <p className="supplier-guardrail">Catalogue browsing does not create Shopify products, change inventory, subscribe to paid plans, place supplier orders or charge customers.</p>
-    </div>
+    </div>}
   </div>;
 }
