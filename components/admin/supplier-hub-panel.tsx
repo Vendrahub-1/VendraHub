@@ -8,7 +8,7 @@ type SupplierStatus = { connection_status?: string; integration_method?: string;
 type CatalogueProduct = {
   id: string; title: string; image?: string | null; sku?: string | null;
   cost?: string | number | null; currency?: string | null; category?: string | null;
-  variant_count?: number | null; delivery_time_hours?: number | null;
+  variant_count?: number | null; inventory?: number | null; free_shipping?: boolean; delivery_cycle_days?: string | number | null; status?: string | null;
 };
 type Supplier = {
   code: SupplierCode; name: string; method: string; detail: string;
@@ -135,7 +135,7 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
           <div className="supplier-product-info"><strong>{product.title}</strong><small>{product.category ?? 'Uncategorised'}{product.sku ? ' · SKU ' + product.sku : ''}</small>
             <small>{product.cost !== null && product.cost !== undefined ? 'Supplier cost: ' + product.cost + ' ' + (product.currency ?? '') : 'Supplier cost: not supplied in this catalogue response'}</small>
             {product.variant_count ? <small>{product.variant_count} variants</small> : null}
-            {product.delivery_time_hours ? <small>Dispatch estimate: {product.delivery_time_hours} hours</small> : null}
+            {product.inventory !== null && product.inventory !== undefined ? <small>Verified stock reported: {product.inventory}</small> : null}\n            {product.free_shipping ? <small>Supplier marks this listing as free shipping</small> : null}\n            {product.delivery_cycle_days ? <small>Supplier delivery cycle: {product.delivery_cycle_days} days (estimate)</small> : null}\n            {product.status ? <small>Shopify status: {product.status}</small> : null}
           </div>
           <span className="state">Not imported</span>
         </article>)}
