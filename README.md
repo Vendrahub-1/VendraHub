@@ -26,18 +26,26 @@ The storefront will then be available at `http://localhost:3000/customer`. `GET 
 
 ## Supplier connections
 
-VendraHub uses the Shopify-app-first approach for Syncee and DSers. Their standard store-owner workflows connect through each supplier's Shopify app and Shopify's merchant-authorised OAuth flow; do not invent or request API tokens for these app-first connections. Install each app from the Shopify Admin Apps area, confirm the correct store, and review the requested permissions before authorising.
+VendraHub's Supplier Hub initially lists four supplier apps:
 
-- Syncee installation guide: https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store
-- DSers Shopify connection guide: https://help.dsers.com/link-shopify-store/
+- Syncee AI Dropshipping: https://apps.shopify.com/syncee-1
+- DSers: https://apps.shopify.com/dsers
+- CJdropshipping: https://apps.shopify.com/cucheng
+- Printful: https://apps.shopify.com/printful
 
-CJdropshipping can also connect through its Shopify app. A separate direct CJ API integration is optional. For that route, create an API key in the CJ account's API settings, then follow CJ's documented access-token flow. The key and returned access/refresh tokens must be stored in a server-side secret manager; never send them in chat or commit them to Git.
+Syncee and DSers use their own Shopify app authorisation and catalogue workflows. Installing either app authorises it to work with the Shopify store; it does not automatically grant VendraHub AI direct access to the supplier's private catalogue. Products imported by those apps can be reviewed through the connected Shopify Admin API after they appear in the store.
+
+CJdropshipping can connect through its Shopify app or through the optional direct API. The direct API uses the server-side `CJ_API_KEY` to exchange for a short-lived access token; never expose or commit those credentials.
 
 - CJ API key guide: https://developers.cjdropshipping.com/en/api/start/apikey.html
-- CJ API development flow: https://developers.cjdropshipping.com/en/api/start/development.html
-- CJ API authentication: https://developers.cjdropshipping.com/en/api/api2/api/auth.html
+- CJ product search API: https://developers.cjdropshipping.com/en/api/api2/api/product.html
 
-The admin page reports whether the optional `CJ_API_KEY` environment variable is configured, but that is not an API connectivity test. Syncee and DSers status must be verified inside their respective apps after OAuth completes.
+Printful can connect through its Shopify app and through a server-side API token. The API supports catalogue browsing, but creating and managing Shopify-connected products has separate platform-sync constraints; product imports must use the supported Shopify app workflow.
+
+- Printful Shopify app: https://apps.shopify.com/printful
+- Printful API documentation: https://developers.printful.com/docs/
+
+The Supplier Hub's Install links open the official Shopify App Store listing. The merchant must select the VendraHub store and approve Shopify's permission screen. A displayed connection status changes only after a successful verification; a configured secret alone is not proof of a working connection.
 
 ## Important safety boundaries
 
