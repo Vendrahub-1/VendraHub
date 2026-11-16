@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
+import SupplierHubPanel from '@/components/admin/supplier-hub-panel';
 import { createClient } from '@/lib/supabase/server';
 
 const suppliers = [
@@ -77,9 +78,8 @@ export default async function AdminPage() {
             <div className="admin-card"><EmptyState title="Customer data is not connected" detail="Customer information will only be available through appropriately scoped, authenticated Shopify access." /></div>
           </Section>
 
-          <Section id="suppliers" title="Supplier connections" description="Compare suppliers, inspect connection health and review sourcing options.">
-            <div className="supplier-grid">{suppliers.map(s => { const currentStatus = supplierStatuses.get(s.code) ?? 'not_connected'; return <article className="admin-card supplier-card" key={s.code}><div className="supplier-title"><div><h3>{s.name}</h3><small>{s.method}</small></div><span className="state">{currentStatus.replaceAll('_', ' ')}</span></div><p>{s.detail}</p><div className="supplier-links"><a href={s.installUrl} target="_blank" rel="noreferrer">Install on Shopify ↗</a><a href={s.docsUrl} target="_blank" rel="noreferrer">Supplier guide ↗</a></div></article>; })}</div>
-            <div className="admin-note"><strong>How installation and AI access work</strong><p>Install opens the supplier’s official Shopify App Store listing. Shopify then asks you to select VendraHub and approve the supplier’s requested permissions. This does not automatically grant VendraHub AI direct access to that supplier’s private catalogue. Syncee and DSers catalogue discovery remains inside their authorised apps; CJdropshipping and Printful direct API access must be verified separately. Product import, publishing, paid plans, supplier purchases, live inventory changes and order submission remain disabled until separately approved.</p></div>
+          <Section id="suppliers" title="Supplier Hub" description="Install supplier apps, verify direct API authentication and browse available supplier catalogues.">
+            <SupplierHubPanel initialStatuses={Object.fromEntries(supplierStatuses)} />
           </Section>
 
           <Section id="inventory" title="Inventory & fulfilment" description="Supplier stock, SKU mapping, delivery estimates and shipment tracking.">
