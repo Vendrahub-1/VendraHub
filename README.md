@@ -75,3 +75,14 @@ The Supplier Hub UI and function source are being developed on `backend/integrat
 ## Android packaging
 
 The repository includes Capacitor configuration for Android packaging. APK generation needs Android Studio, Android SDK, Java/Gradle, and for release APKs, a signing keystore. No signed APK is included in this repository.
+
+
+## AI Product Discovery and Social Media Management
+
+The admin integration branch now includes an AI Product Discovery workspace entry point backed by the existing read-only CJdropshipping, Printful and Shopify catalogue search paths. Supplier listings remain candidates; the current UI does not import or publish products. Full AI ranking, cross-supplier landed-cost comparison, variant-level shipping validation and owner-approved Shopify draft import remain to be completed.
+
+The social foundation registers 20 service integrations across organic social publishing, messaging, website publishing, paid advertising and analytics. Organic publishing targets include Facebook, Instagram, Threads, TikTok, YouTube, LinkedIn, X, Pinterest and Bluesky. Telegram and Discord are messaging destinations; WhatsApp Business is limited to consent-based customer messaging and approved templates, not a general feed publisher. Google Business Profile supports local updates. Google Ads, Apple Ads, Snapchat Ads and Microsoft Advertising are paid advertising services, not organic social networks. Google Analytics and Search Console are reporting services.
+
+Social content is channel-specific. Each platform version has its own content record and approval state. The database requires an authenticated owner decision before a post can enter approved/scheduled/published states, rejects edits to approved content without a fresh review, records approval decisions, and enforces at most one non-rejected/non-cancelled/non-failed post per platform per posting day. The UI exposes the approval queue and platform directory. Account OAuth, AI content generation, media rendering, daily scheduler and publisher workers are not yet connected. No social accounts have been connected and no posts have been published.
+
+All social account registrations, OAuth consents and any paid advertising account/budget setup must be completed by the account owner. No credentials are stored in the platform registry. Paid advertising stays inactive unless separately authorised.
