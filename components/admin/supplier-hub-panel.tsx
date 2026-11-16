@@ -27,7 +27,7 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
     Object.fromEntries(Object.entries(initialStatuses).map(([key, value]) => [key, { connection_status: value }]))
   );
   const [busy, setBusy] = useState<string | null>(null);
-  const [selected, setSelected] = useState<'cjdropshipping' | 'printful'>('cjdropshipping');
+  const [selected, setSelected] = useState<'cjdropshipping' | 'printful' | 'shopify'>('cjdropshipping');
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [message, setMessage] = useState('');
@@ -66,7 +66,7 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
 
   useEffect(() => { void refreshStatuses(); }, [refreshStatuses]);
 
-  async function verifySupplier(code: 'cjdropshipping' | 'printful') {
+  async function verifySupplier(code: SupplierCode) {
     setBusy(code); setError(''); setMessage('Checking supplier authentication and catalogue access…');
     try {
       const payload = await callApi({ action: 'connect', supplier: code });
@@ -83,7 +83,7 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
   async function searchCatalogue() {
     setBusy('catalogue'); setError(''); setMessage('Searching the supplier catalogue…'); setProducts([]); setSearched(false);
     try {
-      const payload = await callApi({ action: 'catalogue', supplier: selected, q: query, page: '1' });
+      const payload = selected === 'shopify' ? await callApi({ action: 'shopify-catalogue', q: query }) : await callApi({ action: 'catalogue', supplier: selected, q: query, page: '1' });
       setProducts(Array.isArray(payload.products) ? payload.products : []);
       setSearched(true);
       setMessage(payload.products?.length ? 'Catalogue results loaded. These are supplier listings only; nothing has been imported.' : 'No matching catalogue products were returned.');
@@ -115,12 +115,13 @@ export default function SupplierHubPanel({ initialStatuses }: { initialStatuses:
       })}
     </div>
     <div className="admin-card supplier-catalogue">
-      <div className="card-heading"><div><h3>Supplier catalogue browser</h3><p>Search supported direct API catalogues without importing or publishing products.</p></div><span className="muted-tag">READ ONLY</span></div>
+      <div className="card-heading"><div><h3>Supplier catalogue browser</h3><p>Search direct supplier catalogues or products already imported into Shopify. Syncee and DSers private catalogues remain inside their apps.</p></div><span className="muted-tag">READ ONLY</span></div>
       <div className="supplier-search">
         <label htmlFor="supplier-select">Supplier</label>
         <select id="supplier-select" value={selected} onChange={e => setSelected(e.target.value as 'cjdropshipping' | 'printful')}>
           <option value="cjdropshipping">CJdropshipping</option>
           <option value="printful">Printful</option>
+          <option value="shopify">Shopify store products (including Syncee / DSers imports)</option>
         </select>
         <label htmlFor="supplier-query">Product keyword</label>
         <input id="supplier-query" value={query} onChange={e => setQuery(e.target.value)} maxLength={120} placeholder="e.g. hoodie, backpack, phone case" />
