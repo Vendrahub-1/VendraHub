@@ -4,9 +4,9 @@ VendraHub is a Next.js commerce starter with separate admin and customer experie
 
 ## Supabase application connection
 
-The connected Supabase project is VendraHub (szishzerqvbdvhmysqpv) in eu-west-1. Its project URL is prefilled in .env.example; add the project's publishable key to your local environment or hosting configuration. The publishable key is designed for browser use, but database access must still be protected with Row Level Security (RLS). Never place a Supabase secret/service-role key in browser code or a NEXT_PUBLIC_ variable.
+The connected Supabase project is VendraHub (szishzerqvbdvhmysqpv) in eu-west-1. The project now contains the customer/admin schema, RLS policies, verified-owner access controls and AAL2 checks. The Next.js app uses Supabase SSR clients. Never place a Supabase secret/service-role key in browser code or a NEXT_PUBLIC_ variable.
 
-The Supabase project is currently a clean database with no application tables or migrations. The Next.js application integration (SSR auth clients, session handling, schema and RLS policies) is not yet implemented. Do not treat the admin preview as authenticated until that work is complete and tested.
+The admin backend has CEO-only authorization using the verified owner identity, the admin_allowlist, and AAL2. The Supplier Hub Edge Function also requires a valid Supabase JWT and checks the owner allowlist server-side. Live authenticated browser testing is still required before treating the full admin experience as production-ready. Supabase Auth still reports leaked-password protection disabled; enable it in Auth password security settings before launch.
 
 ## Shopify storefront connection
 
@@ -47,19 +47,28 @@ Printful can connect through its Shopify app and through a server-side API token
 
 The Supplier Hub's Install links open the official Shopify App Store listing. The merchant must select the VendraHub store and approve Shopify's permission screen. A displayed connection status changes only after a successful verification; a configured secret alone is not proof of a working connection.
 
+The deployed `supplier-hub` Edge Function supports:
+- Owner-only status reads for the four supplier connection records.
+- CJdropshipping API-key exchange followed by read-only product search through Product List V2.
+- Printful API-token verification and read-only product catalogue browsing.
+- Read-only Shopify product catalogue search, which can display products already imported through Syncee or DSers.
+- Server-side secret handling; API credentials and access tokens are never returned to the browser.
+
+The Supplier Hub UI and function source are being developed on `backend/integration-readiness`. The Edge Function is deployed to Supabase, but the branch frontend has not been deployed to the live store. Syncee/DSers app installation and the live CJ/Printful credential checks still require the owner to complete the corresponding Shopify/API authorisation steps.
+
 ## Important safety boundaries
 
 - Supplier product search/import is not run automatically.
 - Product imports require explicit product-level approval.
 - Paid supplier plans, supplier purchases, live inventory updates, order submission and fulfilment automation remain disabled.
 - Do not expose supplier credentials through client components, API responses, logs, or `NEXT_PUBLIC_*` variables.
-- The admin page is currently a development preview, not an authenticated production admin boundary.
+- The admin UI on the integration branch is not yet deployed to the live storefront.
 - Shopify Admin API operations require a separately authenticated and authorised server-side app. Do not reuse a Storefront API token as an Admin API token.
 
 ## Routes
 
 - `/` — VendraHub landing page
-- `/admin` — admin workspace preview (not production-authenticated)
+- `/admin` — owner-only admin workspace and Supplier Hub (integration branch)
 - `/customer` — read-only Shopify product storefront
 - `/api/products` — server-side Shopify product search (`q` optional, `limit` capped at 20)
 
