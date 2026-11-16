@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
 import SupplierHubPanel from '@/components/admin/supplier-hub-panel';
+import SocialMediaPanel from '@/components/admin/social-media-panel';
 import { createClient } from '@/lib/supabase/server';
 
 const suppliers = [
@@ -11,9 +12,9 @@ const suppliers = [
 ];
 
 const nav = [
-  ['Overview', 'overview'], ['Products', 'products'], ['Orders', 'orders'], ['Customers', 'customers'],
+  ['Overview', 'overview'], ['Products', 'products'], ['AI Product Discovery', 'product-discovery'], ['Orders', 'orders'], ['Customers', 'customers'],
   ['Suppliers', 'suppliers'], ['Inventory', 'inventory'], ['Sales & profit', 'finance'], ['Support', 'support'],
-  ['AI assistant', 'assistant'], ['Staff & access', 'staff'], ['Notifications', 'notifications'],
+  ['AI assistant', 'assistant'], ['Social Media', 'social-media'], ['Staff & access', 'staff'], ['Notifications', 'notifications'],
   ['Reports', 'reports'], ['Settings', 'settings'],
 ] as const;
 
@@ -66,8 +67,12 @@ export default async function AdminPage() {
             <article className="admin-card"><div className="card-heading"><div><h3>Launch readiness</h3><p>Current implementation checkpoints</p></div></div><ul className="readiness-list"><li><span>Admin authentication</span><b className="state state-warning">Owner MFA enforced</b></li><li><span>Database and access policies</span><b className="state state-warning">RLS enabled</b></li><li><span>Shopify Admin API</span><b className="state">Not verified</b></li><li><span>Supplier connections</span><b className="state">Pending</b></li><li><span>Live operations</span><b className="state state-paused">Disabled</b></li></ul></article>
           </div>
 
-          <Section id="products" title="Products" description="Catalogue, variants, pricing, product approval and publication.">
-            <div className="admin-card"><div className="card-heading"><div><h3>Product catalogue</h3><p>Product data is not yet connected to an authenticated admin service.</p></div><span className="muted-tag">READINESS ONLY</span></div><EmptyState title="No admin catalogue loaded" detail="The existing storefront product endpoint is read-only. Product imports and publishing remain disabled pending approval." /></div>
+          <Section id="products" title="Products" description="Store product catalogue and products already approved for the VendraHub storefront.">
+            <div className="admin-card"><div className="card-heading"><div><h3>Store catalogue</h3><p>Supplier discovery results remain separate from live Shopify products until an owner approves an import.</p></div><span className="muted-tag">IMPORT REVIEW REQUIRED</span></div><EmptyState title="Store catalogue view is being connected" detail="The AI Product Discovery workspace below searches supplier catalogues without publishing products." /></div>
+          </Section>
+          <Section id="product-discovery" title="AI Product Discovery" description="Search supplier catalogues, compare source costs and product details, and prepare selected products for owner-reviewed import.">
+            <SupplierHubPanel initialStatuses={Object.fromEntries(supplierStatuses)} mode="catalogue" />
+            <p className="admin-footnote">Current catalogue search is read-only. AI ranking, landed-cost verification, variant-level shipping comparison and Shopify draft import are separate implementation steps. No product is imported or published automatically.</p>
           </Section>
 
           <Section id="orders" title="Orders" description="Order review, status, payment reconciliation, returns and fulfilment.">
@@ -79,7 +84,7 @@ export default async function AdminPage() {
           </Section>
 
           <Section id="suppliers" title="Supplier Hub" description="Install supplier apps, verify direct API authentication and browse available supplier catalogues.">
-            <SupplierHubPanel initialStatuses={Object.fromEntries(supplierStatuses)} />
+            <SupplierHubPanel initialStatuses={Object.fromEntries(supplierStatuses)} mode="connections" />
           </Section>
 
           <Section id="inventory" title="Inventory & fulfilment" description="Supplier stock, SKU mapping, delivery estimates and shipment tracking.">
@@ -96,6 +101,10 @@ export default async function AdminPage() {
 
           <Section id="assistant" title="AI operations assistant" description="Research, compare, explain and prepare actions for administrator review.">
             <div className="admin-card"><div className="card-heading"><h3>AI assistance policy</h3><span className="state state-paused">Approval required</span></div><ul className="feature-list"><li>Supplier comparison and sourcing summaries</li><li>Draft product descriptions and catalogue recommendations</li><li>Sales explanations and operational anomaly summaries</li><li>Prepare changes for human review</li></ul><p className="admin-footnote">AI does not independently import products, purchase subscriptions, place supplier orders, change live inventory or issue refunds.</p></div>
+          </Section>
+
+          <Section id="social-media" title="Social Media Management" description="Platform connections, channel-specific content, owner approvals and publishing controls.">
+            <SocialMediaPanel />
           </Section>
 
           <Section id="staff" title="Staff & access" description="Administrator identity, staff roles, permissions and audit history.">
