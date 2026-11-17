@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'VendraHub',
-  description: 'VendraHub ecommerce, admin, and customer experience foundation.',
+  title: 'VendraHub | More choice. Better living.',
+  description: 'Discover the VendraHub online store, manage your customer account, or open the store administration workspace.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
