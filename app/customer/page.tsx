@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import CheckoutButton from '@/components/storefront/checkout-button';
 import {
@@ -28,10 +29,11 @@ export default async function CustomerPage() {
 
   return (
     <main className="session-page customer-theme">
-      <div className="topbar">
-        <Link href="/" className="crumb-link">← Back to home</Link>
-        <span className="session-pill">Customer storefront</span>
-      </div>
+      <header className="storefront-header">
+        <Link href="/" className="storefront-brand" aria-label="VendraHub home"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={250} height={73} priority /></Link>
+        <nav className="storefront-header-nav" aria-label="Customer navigation"><Link href="/customer">Shop</Link><Link href="/customer/account">My account</Link><Link href="/customer/login" className="storefront-signin">Sign in</Link></nav>
+      </header>
+      <div className="storefront-subnav"><Link href="/">← Back to home</Link><span className="session-pill">Customer storefront</span></div>
 
       <section className="panel intro-panel">
         <div>
