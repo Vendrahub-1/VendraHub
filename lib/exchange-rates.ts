@@ -28,7 +28,7 @@ export async function getExchangeRates(baseInput: string): Promise<ExchangeRateS
   }
 
   const rates: Record<string, number> = {};
-  for (const currency of SUPPORTED_CURRENCIES) {
+  for (const currency of Array.from(SUPPORTED_CURRENCIES)) {
     const rate = payload.rates[currency];
     if (typeof rate === 'number' && Number.isFinite(rate) && rate > 0) rates[currency] = rate;
   }
