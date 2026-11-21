@@ -3,7 +3,10 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'VendraHub',
-  description: 'VendraHub ecommerce, admin, and customer experience foundation.',
+  description: 'VendraHub — Shop Smart. Live Stylish. Fashion, footwear and lifestyle essentials.',
+  applicationName: 'VendraHub',
+  icons: { icon: '/vendrahub-icon.svg', shortcut: '/vendrahub-icon.svg', apple: '/vendrahub-icon.svg' },
+  openGraph: { title: 'VendraHub', description: 'Shop Smart. Live Stylish.', siteName: 'VendraHub', type: 'website' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
