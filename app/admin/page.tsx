@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
 import PricingCalculator from '@/components/admin/pricing-calculator';
@@ -36,7 +37,7 @@ export default async function AdminPage() {
   return (
     <main className="admin-layout">
       <aside className="admin-sidebar">
-        <Link href="/" className="admin-brand"><span className="brand-mark">V</span><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span></Link>
+        <Link href="/" className="admin-brand"><Image src="/vendrahub-icon.svg" alt="" width={44} height={44} priority className="admin-brand-icon" /><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span></Link>
         <div className="sidebar-label">WORKSPACE</div>
         <nav aria-label="Admin navigation" className="admin-nav">
           {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
