@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -94,7 +95,7 @@ export default function CustomerAccountPage() {
   if (loading) return <main className="session-page"><p>Loading your account…</p></main>;
 
   return <main className="session-page customer-theme customer-portal">
-    <header className="topbar"><Link href="/" className="crumb-link">← Storefront</Link><SignOutButton /></header>
+    <header className="account-header"><Link href="/customer" className="account-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={220} height={64} priority /></Link><div className="account-header-actions"><Link href="/customer">Continue shopping</Link><SignOutButton /></div></header>
     <section className="hero-panel intro-panel"><div><p className="eyebrow">VENDRAHUB CUSTOMER ACCOUNT</p><h1>Welcome{profile.full_name ? `, ${profile.full_name}` : ''}</h1><p>{email}</p></div><span className="session-pill">Customer</span></section>
     {notice && <p className="customer-notice" role="status">{notice}</p>}{error && <p className="auth-error" role="alert">{error}</p>}
     <nav className="customer-nav"><a href="#profile">Profile</a><a href="#addresses">Delivery addresses</a><a href="#wishlist">Wishlist</a><a href="#support">Support</a><a href="#orders">Orders</a></nav>
