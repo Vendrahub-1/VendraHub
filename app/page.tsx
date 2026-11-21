@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 const dashboardCards = [
@@ -18,7 +19,8 @@ const dashboardCards = [
 export default function HomePage() {
   return (
     <main className="page-shell">
-      <section className="hero-panel">
+      <section className="hero-panel home-hero">
+        <Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={420} height={122} priority className="home-brand-logo" />
         <div className="eyebrow">VendraHub</div>
         <h1>Modern commerce sessions for admins and customers.</h1>
         <p>
