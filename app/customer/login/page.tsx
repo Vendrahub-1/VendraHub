@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -38,7 +39,8 @@ export default function CustomerLoginPage() {
   }
 
   return <main className="auth-shell"><section className="auth-card">
-    <Link href="/" className="auth-back">← VendraHub storefront</Link>
+    <Link href="/customer" className="auth-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={250} height={73} priority /></Link>
+    <Link href="/customer" className="auth-back">← Back to storefront</Link>
     <p className="auth-kicker">CUSTOMER ACCOUNT</p><h1>{mode === 'signin' ? 'Welcome back' : 'Create your account'}</h1>
     <p className="auth-description">Sign in to manage your profile, wishlist and support requests.</p>
     {notice && <p className="auth-description" role="status">{notice}</p>}
