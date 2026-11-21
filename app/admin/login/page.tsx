@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -35,7 +36,8 @@ export default function AdminLoginPage() {
   }
 
   return <main className="auth-shell"><section className="auth-card">
-    <Link href="/" className="auth-back">← VendraHub storefront</Link>
+    <Link href="/" className="auth-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={250} height={73} priority /></Link>
+    <Link href="/" className="auth-back">← VendraHub home</Link>
     <p className="auth-kicker">PRIVATE OWNER ACCESS</p><h1>Admin sign in</h1>
     <p className="auth-description">Only the verified owner account can enter the administration workspace. Authenticator verification is required.</p>
     {error && <p className="auth-error" role="alert">{error}</p>}
