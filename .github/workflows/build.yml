@@ -1,4 +1,4 @@
-name: VendraHub build
+name: VendraHub Next.js verification
 
 on:
   push:
@@ -10,17 +10,29 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: vendrahub-next-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  nextjs-build:
+    name: TypeScript and Next.js production build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up Node.js
+
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install dependencies
-        run: npm install
-      - name: Build Next.js application
+        run: npm install --no-audit --no-fund
+
+      - name: TypeScript verification
+        run: npx tsc --noEmit
+
+      - name: Next.js production build
         run: npm run build
