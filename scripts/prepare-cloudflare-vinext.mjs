@@ -9,36 +9,45 @@ if (!workerName || !["vendrahub", "vendrahub-customer"].includes(workerName)) {
 
 let config = readFileSync(configPath, "utf8");
 
-function replaceOnce(source, search, replacement, label) {
+function ensureOnce(source, pattern, replacement, label) {
   if (source.includes(replacement)) return source;
-  if (!source.includes(search)) {
+  if (!pattern.test(source)) {
     throw new Error(`Unexpected vinext config: missing ${label}; refusing to deploy with incomplete bindings.`);
   }
-  return source.replace(search, replacement);
+  return source.replace(pattern, (match) => `${match}\n    ${replacement}`);
 }
 
-config = replaceOnce(
+config = ensureOnce(
   config,
-  "ASSETS: bindings.assets(),",
-  [
-    "ASSETS: bindings.assets(),",
-    "      IMAGES: bindings.images(),",
-    '      WORKER_SELF_REFERENCE: bindings.worker({ worker: "vendrahub" }),',
-  ].join("\n"),
+  /ASSETS:\s*bindings\.assets\(\),?/,
+  'IMAGES: bindings.images(),',
   "ASSETS binding",
 );
 
-config = replaceOnce(
-  config,
-  'compatibilityDate: "2026-11-21",',
-  [
-    'compatibilityDate: "2026-11-21",',
-    '    compatibilityFlags: ["global_fetch_strictly_public"],',
-    "    observability: { enabled: true, headSamplingRate: 1, redactQueryString: false, logs: { enabled: true, headSamplingRate: 1, invocationLogs: true, persist: true }, traces: { enabled: true, headSamplingRate: 1, persist: true }, issues: { enabled: false } },",
-    ...(workerName === "vendrahub" ? ['    placement: { mode: "smart" },'] : []),
-  ].join("\n"),
-  "compatibility date",
-);
+if (!config.includes("WORKER_SELF_REFERENCE:")) {
+  config = config.replace(
+    /IMAGES:\s*bindings\.images\(\),?/,
+    (match) => `${match}\n      WORKER_SELF_REFERENCE: bindings.worker({ worker: "vendrahub" }),`,
+  );
+  if (!config.includes("WORKER_SELF_REFERENCE:")) {
+    throw new Error("Unexpected vinext config: unable to add the VendraHub service binding.");
+  }
+}
+
+const compatibilityDate = /compatibilityDate\s*:\s*["'][^"']+["']\s*,?/;
+if (!compatibilityDate.test(config)) {
+  throw new Error("Unexpected vinext config: missing compatibility date; refusing to deploy with incomplete bindings.");
+}
+
+const additions = [
+  !config.includes("compatibilityFlags:") ? 'compatibilityFlags: ["global_fetch_strictly_public"],' : null,
+  !config.includes("observability:") ? 'observability: { enabled: true, headSamplingRate: 1, redactQueryString: false, logs: { enabled: true, headSamplingRate: 1, invocationLogs: true, persist: true }, traces: { enabled: true, headSamplingRate: 1, persist: true }, issues: { enabled: false } },' : null,
+  workerName === "vendrahub" && !config.includes("placement:") ? 'placement: { mode: "smart" },' : null,
+].filter(Boolean);
+
+if (additions.length) {
+  config = config.replace(compatibilityDate, (match) => `${match}\n    ${additions.join("\n    ")}`);
+}
 
 writeFileSync(configPath, config);
 console.log(`Prepared Cloudflare config for ${workerName}, preserving Images, service binding, compatibility, and observability settings.`);
