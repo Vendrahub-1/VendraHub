@@ -8,10 +8,6 @@ import { createClient } from '@/lib/supabase/client';
 
 const OWNER_EMAIL = 'vendrahub@hotmail.com';
 
-function callbackUrl(next: string) {
-  return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
-}
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState(OWNER_EMAIL);
