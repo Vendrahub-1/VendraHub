@@ -24,7 +24,7 @@ export default function AdminMfaPage() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com' || !user.email_confirmed_at) {
+        if (!user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com') {
           router.replace('/admin/login');
           return;
         }
