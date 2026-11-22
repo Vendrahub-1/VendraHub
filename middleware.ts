@@ -10,11 +10,13 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
   const isAdminLogin = pathname === '/admin/login';
+  const isAdminRecovery = pathname === '/admin/recover';
+  const isAdminResetPassword = pathname === '/admin/reset-password';
   const isAdminMfa = pathname === '/admin/mfa';
   const isCustomerPrivate = pathname.startsWith('/customer/account') || pathname.startsWith('/api/customer');
 
   if (!url || !key) {
-    if ((isAdminRoute && !isAdminLogin) || isCustomerPrivate) {
+    if ((isAdminRoute && !isAdminLogin && !isAdminRecovery) || isCustomerPrivate) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication service is not configured.' }, { status: 503 });
       return NextResponse.redirect(new URL('/admin/login?error=configuration', request.url));
     }
@@ -39,6 +41,19 @@ export async function middleware(request: NextRequest) {
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (level?.currentLevel === 'aal2') return NextResponse.redirect(new URL('/admin', request.url));
       if (level?.nextLevel === 'aal2') return NextResponse.redirect(new URL('/admin/mfa', request.url));
+    }
+    return response;
+  }
+
+  // Password recovery starts before an authenticated session exists.
+  if (isAdminRecovery) return response;
+
+  // A valid recovery callback creates a temporary owner session. Allow the
+  // owner to set a new password before completing the normal MFA gate.
+  if (isAdminResetPassword) {
+    if (!user) return NextResponse.redirect(new URL('/admin/login?error=reset_session', request.url));
+    if (user.email?.toLowerCase() !== OWNER_EMAIL) {
+      return NextResponse.redirect(new URL('/admin/login?error=not_authorised', request.url));
     }
     return response;
   }
