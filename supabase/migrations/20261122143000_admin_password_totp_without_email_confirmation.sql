@@ -1,6 +1,7 @@
 -- VendraHub owner access: password + TOTP MFA, without email confirmation.
--- Owner status remains restricted to the explicitly enabled admin allowlist.
--- Every database admin check continues to require an AAL2 JWT.
+-- The enabled admin allowlist is retained, but public signup must NEVER
+-- automatically grant the super_admin role based on an email address alone.
+-- Existing allowlisted owner is bootstrapped below; AAL2 remains mandatory.
 
 create or replace function private.is_admin()
 returns boolean
@@ -43,6 +44,7 @@ as $function$
     );
 $function$;
 
+-- Keep normal customer profile/role creation, but do not grant admin on signup.
 create or replace function private.handle_new_vendrahub_user()
 returns trigger
 language plpgsql
@@ -71,30 +73,24 @@ begin
   values(new.id, 'customer')
   on conflict do nothing;
 
-  if exists (
-    select 1
-    from public.admin_allowlist
-    where email = lower(new.email)
-      and enabled
-  ) then
-    insert into public.admin_profiles(user_id, display_name)
-    values(
-      new.id,
-      coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name')
-    )
-    on conflict(user_id) do update set staff_status = 'active';
-
-    insert into public.admin_role_assignments(user_id, role_code)
-    values(new.id, 'super_admin')
-    on conflict do nothing;
-  end if;
-
   return new;
 end;
 $function$;
 
--- Bootstrap only accounts already present in auth.users whose exact email
--- is enabled in the admin allowlist. AAL2 remains mandatory for all admin access.
+-- Disable the old email-confirmation promotion trigger's grant behavior.
+-- This prevents email confirmation state or public signup from being an admin grant path.
+create or replace function private.promote_confirmed_allowlisted_owner()
+returns trigger
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+begin
+  return new;
+end;
+$function$;
+
+-- Bootstrap only the existing Auth user that is already on the enabled allowlist.
 insert into public.admin_profiles(user_id)
 select u.id
 from auth.users u
