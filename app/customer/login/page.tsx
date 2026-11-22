@@ -31,7 +31,7 @@ export default function CustomerLoginPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) {
-          setNotice('The account request was received, but Supabase is still requiring email confirmation. Disable Confirm email in Supabase Auth settings for this testing phase, then try again.');
+          setNotice('Supabase did not create a sign-in session. Check that email confirmation is disabled in the Supabase Auth settings, then try again.');
           return;
         }
         router.replace('/customer/account');
