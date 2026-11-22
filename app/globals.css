@@ -567,3 +567,15 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 @media(max-width:650px){.vh-home-header,.vh-store-header{min-height:72px;align-items:flex-start;flex-direction:column;justify-content:center;gap:12px;padding:14px 0}.vh-home-header nav,.vh-store-header nav{width:100%;justify-content:space-between;gap:10px;font-size:11px}.vh-home-hero,.vh-store-hero{grid-template-columns:1fr;padding:48px 0}.vh-hero-copy h1{font-size:66px}.vh-hero-art{min-height:310px}.vh-pathways{grid-template-columns:1fr;padding-bottom:40px}.vh-pathway{min-height:220px}.vh-home-footer,.vh-store-footer{flex-wrap:wrap}.vh-store-hero-art{min-height:210px}.vh-collection-heading{align-items:flex-start;flex-direction:column}.vh-search{width:100%}.vh-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.vh-product-info{padding:11px}.vh-product-info h3{font-size:12px}.vh-store{padding:0 13px}}
 @media(max-width:380px){.vh-product-grid{grid-template-columns:1fr}.vh-hero-copy h1{font-size:56px}}
 @media(prefers-reduced-motion:reduce){.vh-home *,.vh-store *{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Admin dashboard quick navigation */
+.admin-quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.admin-quick-actions a{position:relative;display:grid;gap:6px;min-width:0;padding:15px 16px;background:#fff;border:1px solid #e9e7e1;border-radius:12px;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.admin-quick-actions a:hover{transform:translateY(-2px);border-color:#c9a227;box-shadow:0 8px 20px rgba(24,22,15,.06)}
+.admin-quick-actions a>span{color:#a58a48;font-size:9px;letter-spacing:.12em;font-weight:800}
+.admin-quick-actions a strong{font-size:13px;color:#24231f}
+.admin-quick-actions a small{font-size:10px;color:#89877f}
+.admin-quick-actions a>b{position:absolute;right:14px;top:13px;color:#a58a48;font-size:12px}
+.admin-quick-actions a:focus-visible{outline:3px solid rgba(177,139,32,.45);outline-offset:3px}
+@media(max-width:760px){.admin-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-quick-actions a{padding:13px}}
+@media(max-width:380px){.admin-quick-actions{grid-template-columns:1fr 1fr}.admin-quick-actions a strong{font-size:12px}}
