@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (isAdminLogin) {
-    if (user?.email?.toLowerCase() === OWNER_EMAIL && user.email_confirmed_at) {
+    if (user?.email?.toLowerCase() === OWNER_EMAIL) {
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (level?.currentLevel === 'aal2') return NextResponse.redirect(new URL('/admin', request.url));
       if (level?.nextLevel === 'aal2') return NextResponse.redirect(new URL('/admin/mfa', request.url));
@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    if (user.email?.toLowerCase() !== OWNER_EMAIL || !user.email_confirmed_at) {
+    if (user.email?.toLowerCase() !== OWNER_EMAIL) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Owner access only.' }, { status: 403 });
       return NextResponse.redirect(new URL('/admin/login?error=not_authorised', request.url));
     }
