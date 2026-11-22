@@ -31,7 +31,7 @@ export default function CustomerLoginPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) {
-          setNotice('Supabase did not create a sign-in session. Check that email confirmation is disabled in the Supabase Auth settings, then try again.');
+          setNotice('Your account request did not return an active sign-in session. Try signing in; if the issue continues, the Auth provider configuration needs checking.');
           return;
         }
         router.replace('/customer/account');
