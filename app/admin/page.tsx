@@ -52,6 +52,13 @@ export default async function AdminPage() {
 
           <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Protected owner workspace — operational integrations remain read-only</strong><p>Only the verified owner session with authenticator-based MFA can access this console. Supplier purchases, imports, live inventory changes, payments and fulfilment actions remain disabled.</p></div></div>
 
+          <nav className="admin-quick-actions" aria-label="Quick management links">
+            <a href="#products"><span>01</span><strong>Products</strong><small>Catalogue & pricing</small><b aria-hidden="true">↗</b></a>
+            <a href="#orders"><span>02</span><strong>Orders</strong><small>Review fulfilment</small><b aria-hidden="true">↗</b></a>
+            <a href="#customers"><span>03</span><strong>Customers</strong><small>Profiles & support</small><b aria-hidden="true">↗</b></a>
+            <a href="#finance"><span>04</span><strong>Sales & profit</strong><small>Pricing tools</small><b aria-hidden="true">↗</b></a>
+          </nav>
+
           <div className="admin-metrics">
             {[
               { label: 'Support requests', value: String(ticketsResult.count ?? 0), note: 'Customer tickets in Supabase' },
