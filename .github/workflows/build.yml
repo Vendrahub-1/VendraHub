@@ -36,3 +36,5 @@ jobs:
 
       - name: Next.js production build
         run: npm run build
+
+# Re-trigger PR verification for the customer storefront refresh.
