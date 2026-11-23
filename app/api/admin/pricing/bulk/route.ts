@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com' || !user.email_confirmed_at) {
+  if (!user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com') {
     return NextResponse.json({ error: 'Owner access only.' }, { status: 403 });
   }
   const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();

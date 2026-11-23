@@ -8,6 +8,10 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/customer/account';
   const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/customer/account';
+  const isAdminDestination = safeNext.startsWith('/admin/');
+  const failureDestination = isAdminDestination
+    ? '/admin/recover?error=expired'
+    : '/customer/login?error=verification';
 
   if (code) {
     const cookieStore = await cookies();
@@ -23,5 +27,5 @@ export async function GET(request: Request) {
     if (!error) return NextResponse.redirect(new URL(safeNext, origin));
   }
 
-  return NextResponse.redirect(new URL('/customer/login?error=verification', origin));
+  return NextResponse.redirect(new URL(failureDestination, origin));
 }

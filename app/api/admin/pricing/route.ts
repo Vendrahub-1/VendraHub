@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com' || !user.email_confirmed_at) {
+  if (userError || !user || user.email?.toLowerCase() !== 'vendrahub@hotmail.com') {
     return NextResponse.json({ error: 'Owner access only.' }, { status: 403 });
   }
 

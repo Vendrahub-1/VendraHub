@@ -19,8 +19,7 @@ export async function GET() {
 
   if (
     !user ||
-    user.email?.toLowerCase() !== "vendrahub@hotmail.com" ||
-    !user.email_confirmed_at
+    user.email?.toLowerCase() !== "vendrahub@hotmail.com"
   ) {
     return NextResponse.json({ error: "Owner access only." }, { status: 403 });
   }

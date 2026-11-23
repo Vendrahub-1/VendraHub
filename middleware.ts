@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '@/lib/supabase/config';
+import { ADMIN_RECOVERY_COOKIE, verifyAdminRecoveryProof } from '@/lib/admin-recovery';
 
 const OWNER_EMAIL = 'vendrahub@hotmail.com';
 
@@ -10,13 +11,16 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
   const isAdminLogin = pathname === '/admin/login';
+  const isAdminRecovery = pathname === '/admin/recover';
+  const isAdminResetPassword = pathname === '/admin/reset-password';
+  const isAdminRecoveryPasswordApi = pathname === '/api/admin/recovery-password';
   const isAdminMfa = pathname === '/admin/mfa';
   const isCustomerPrivate = pathname.startsWith('/customer/account') || pathname.startsWith('/api/customer');
 
   if (!url || !key) {
-    if ((isAdminRoute && !isAdminLogin) || isCustomerPrivate) {
+    if ((isAdminRoute && !isAdminLogin && !isAdminRecovery) || isCustomerPrivate) {
       if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication service is not configured.' }, { status: 503 });
-      return NextResponse.redirect(new URL('/admin/login?error=configuration', request.url));
+      return NextResponse.redirect(new URL(isAdminResetPassword ? '/admin/recover?error=config' : '/admin/login?error=configuration', request.url));
     }
     return NextResponse.next();
   }
@@ -39,6 +43,34 @@ export async function middleware(request: NextRequest) {
       const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (level?.currentLevel === 'aal2') return NextResponse.redirect(new URL('/admin', request.url));
       if (level?.nextLevel === 'aal2') return NextResponse.redirect(new URL('/admin/mfa', request.url));
+    }
+    return response;
+  }
+
+  if (isAdminRecovery) return response;
+
+  if (isAdminResetPassword || isAdminRecoveryPasswordApi) {
+    const isApi = isAdminRecoveryPasswordApi;
+    const destination = '/admin/recover?error=expired';
+    if (!user) {
+      return isApi
+        ? NextResponse.json({ error: 'A verified recovery session is required.' }, { status: 401 })
+        : NextResponse.redirect(new URL(destination, request.url));
+    }
+    if (user.email?.toLowerCase() !== OWNER_EMAIL) {
+      return isApi
+        ? NextResponse.json({ error: 'Owner access only.' }, { status: 403 })
+        : NextResponse.redirect(new URL('/admin/login?error=not_authorised', request.url));
+    }
+    const validRecovery = await verifyAdminRecoveryProof(
+      request.cookies.get(ADMIN_RECOVERY_COOKIE)?.value,
+      user.id,
+      process.env.ADMIN_RECOVERY_COOKIE_SECRET,
+    );
+    if (!validRecovery) {
+      return isApi
+        ? NextResponse.json({ error: 'A verified recovery link is required.' }, { status: 403 })
+        : NextResponse.redirect(new URL(destination, request.url));
     }
     return response;
   }
