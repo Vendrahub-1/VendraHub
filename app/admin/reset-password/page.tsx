@@ -1,12 +1,8 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-
-const OWNER_EMAIL = 'vendrahub@hotmail.com';
 
 export default function AdminResetPasswordPage() {
   const router = useRouter();
@@ -20,14 +16,13 @@ export default function AdminResetPasswordPage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const supabase = createClient();
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (!active) return;
-      if (userError || user?.email?.toLowerCase() !== OWNER_EMAIL) {
-        setError('This password-reset session is invalid or has expired. Request a new reset email.');
-        return;
+      try {
+        const response = await fetch('/api/admin/recovery-password', { cache: 'no-store' });
+        if (!response.ok) throw new Error('This recovery session is invalid or has expired. Request a new reset email.');
+        if (active) setReady(true);
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : 'This recovery session is invalid or has expired.');
       }
-      setReady(true);
     })();
     return () => { active = false; };
   }, []);
@@ -46,15 +41,19 @@ export default function AdminResetPasswordPage() {
     }
     setBusy(true);
     try {
-      const supabase = createClient();
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) throw updateError;
-      await supabase.auth.signOut();
+      const response = await fetch('/api/admin/recovery-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+        cache: 'no-store',
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error ?? 'Could not update the owner password.');
       setNotice('Your owner password has been updated. Sign in again, then complete authenticator verification.');
       window.setTimeout(() => {
         router.replace('/admin/login?password_reset=success');
         router.refresh();
-      }, 1200);
+      }, 900);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not update the owner password.');
     } finally {
@@ -65,7 +64,7 @@ export default function AdminResetPasswordPage() {
   return <main className="auth-shell"><section className="auth-card">
     <Link href="/admin/login" className="auth-back">← Admin sign in</Link>
     <p className="auth-kicker">PRIVATE OWNER ACCESS</p><h1>Choose a new password</h1>
-    <p className="auth-description">This page accepts only a valid recovery session for the designated owner account.</p>
+    <p className="auth-description">This form is available only after the owner recovery token has been verified by Supabase.</p>
     {error && <p className="auth-error" role="alert">{error}</p>}
     {notice && <p className="auth-description" role="status">{notice}</p>}
     {ready && <form onSubmit={submit} className="auth-form">

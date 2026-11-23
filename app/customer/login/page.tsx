@@ -31,7 +31,7 @@ export default function CustomerLoginPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) {
-          setNotice('Your account request did not return an active sign-in session. Try signing in; if the issue continues, the Auth provider configuration needs checking.');
+          setNotice('Your account request was received, but no active sign-in session was returned. If email confirmation is enabled, check your inbox and spam folder, then follow the confirmation link before signing in. If confirmation is disabled and no email arrives, try again later.');
           return;
         }
         router.replace('/customer/account');

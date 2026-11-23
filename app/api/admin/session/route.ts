@@ -7,7 +7,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return NextResponse.json({ authenticated: false }, { status: 401 });
-  if (user.email?.toLowerCase() !== 'vendrahub@hotmail.com' || !user.email_confirmed_at) {
+  if (user.email?.toLowerCase() !== 'vendrahub@hotmail.com') {
     return NextResponse.json({ authenticated: false }, { status: 403 });
   }
   const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
