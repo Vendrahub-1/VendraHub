@@ -121,5 +121,22 @@ export async function searchShopifyProducts(
     }));
   }
 
-  throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
+  const adminApiOrigin = process.env.VENDRAHUB_ADMIN_API_URL ?? 'https://vendrahub.vendrahub.workers.dev';
+  const adminCatalogUrl = new URL('/api/public/products', adminApiOrigin);
+  adminCatalogUrl.searchParams.set('limit', String(boundedLimit));
+  if (search.trim()) adminCatalogUrl.searchParams.set('q', search.trim().slice(0, 100));
+
+  const adminResponse = await fetch(adminCatalogUrl, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!adminResponse.ok) {
+    throw new Error(`Shopify Storefront API rejected all configured tokens (${lastAuthStatus ?? 'unknown'}) and Admin catalog fallback failed (${adminResponse.status}).`);
+  }
+
+  const adminPayload = (await adminResponse.json()) as { products?: StorefrontProduct[] };
+  return adminPayload.products ?? [];
 }
