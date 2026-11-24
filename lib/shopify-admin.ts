@@ -26,7 +26,7 @@ function getShopifyConfig() {
     throw new Error("Shopify Admin API credentials are not configured.");
   }
 
-  return { domain, clientId, clientSecret, adminAccessToken };
+  return { domain, clientId: clientId ?? "", clientSecret: clientSecret ?? "" };
 }
 
 export async function getShopifyAdminAccessToken(): Promise<string> {
