@@ -1,9 +1,12 @@
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN ?? 'vendrahub-store.myshopify.com';
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? '2026-10';
-const SHOPIFY_PRIVATE_TOKENS = [
-  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN,
-  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
-].filter((token): token is string => Boolean(token));
+const SHOPIFY_TOKEN_CANDIDATES = [
+  { token: process.env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN, header: 'X-Shopify-Storefront-Access-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN, header: 'Shopify-Storefront-Private-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1, header: 'Shopify-Storefront-Private-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN, header: 'X-Shopify-Storefront-Access-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1, header: 'X-Shopify-Storefront-Access-Token' },
+].filter((candidate): candidate is { token: string; header: string } => Boolean(candidate.token));
 
 export type StorefrontProduct = {
   id: string;
@@ -66,18 +69,18 @@ export async function searchShopifyProducts(
   search = '',
   limit = 20,
 ): Promise<StorefrontProduct[]> {
-  if (SHOPIFY_PRIVATE_TOKENS.length === 0) throw new ShopifyConfigurationError();
+  if (SHOPIFY_TOKEN_CANDIDATES.length === 0) throw new ShopifyConfigurationError();
 
   const boundedLimit = Math.min(Math.max(Math.floor(limit), 1), 20);
   const endpoint = `https://${SHOPIFY_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
   let lastAuthStatus: number | null = null;
 
-  for (const token of SHOPIFY_PRIVATE_TOKENS) {
+  for (const candidate of SHOPIFY_TOKEN_CANDIDATES) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Shopify-Storefront-Private-Token': token,
+        [candidate.header]: candidate.token,
       },
       body: JSON.stringify({
         query: PRODUCTS_QUERY,
@@ -121,5 +124,22 @@ export async function searchShopifyProducts(
     }));
   }
 
-  throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
+  const adminApiOrigin = process.env.VENDRAHUB_ADMIN_API_URL ?? 'https://vendrahub.vendrahub.workers.dev';
+  const adminCatalogUrl = new URL('/api/public/products', adminApiOrigin);
+  adminCatalogUrl.searchParams.set('limit', String(boundedLimit));
+  if (search.trim()) adminCatalogUrl.searchParams.set('q', search.trim().slice(0, 100));
+
+  const adminResponse = await fetch(adminCatalogUrl, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!adminResponse.ok) {
+    throw new Error(`Shopify Storefront API rejected all configured tokens (${lastAuthStatus ?? 'unknown'}) and Admin catalog fallback failed (${adminResponse.status}).`);
+  }
+
+  const adminPayload = (await adminResponse.json()) as { products?: StorefrontProduct[] };
+  return adminPayload.products ?? [];
 }

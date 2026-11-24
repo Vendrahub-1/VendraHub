@@ -25,7 +25,9 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
     return [];
   });
   const shopifyReady = Boolean(
-    process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN || process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
+    process.env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN ||
+    process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN ||
+    process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
   );
 
   return (
