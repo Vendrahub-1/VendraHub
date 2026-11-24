@@ -42,7 +42,7 @@ export default async function AdminPage() {
         <nav aria-label="Admin navigation" className="admin-nav">
           {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
-        <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small><Link href="/">← Store home</Link></div>
+        <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small></div>
       </aside>
 
       <div className="admin-main">
