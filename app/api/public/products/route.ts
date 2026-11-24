@@ -11,7 +11,7 @@ type AdminProductsResponse = {
       handle: string;
       description: string;
       publishedAt: string | null;
-      featuredImage: { url: string; altText: string | null } | null;
+      featuredMedia: { preview: { image: { url: string; altText: string | null } | null } | null } | null;
       priceRangeV2: {
         minVariantPrice: { amount: string; currencyCode: string };
       };
@@ -31,7 +31,7 @@ const PUBLIC_PRODUCTS_QUERY = `
         handle
         description
         publishedAt
-        featuredImage { url altText }
+        featuredMedia { ... on MediaImage { preview { image { url altText } } } }
         priceRangeV2 { minVariantPrice { amount currencyCode } }
         variants(first: 1) { nodes { id availableForSale } }
       }
@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
           handle: product.handle,
           description: product.description,
           availableForSale: variant?.availableForSale ?? false,
-          imageUrl: product.featuredImage?.url ?? null,
-          imageAlt: product.featuredImage?.altText ?? null,
+          imageUrl: product.featuredMedia?.preview?.image?.url ?? null,
+          imageAlt: product.featuredMedia?.preview?.image?.altText ?? null,
           price: product.priceRangeV2.minVariantPrice.amount,
           currencyCode: product.priceRangeV2.minVariantPrice.currencyCode,
           variantId: variant?.id ?? null,
