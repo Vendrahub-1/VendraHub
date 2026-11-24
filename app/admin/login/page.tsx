@@ -51,8 +51,8 @@ export default function AdminLoginPage() {
   }
 
   return <main className="auth-shell"><section className="auth-card">
-    <Link href="/" className="auth-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={250} height={73} priority /></Link>
-    <Link href="/" className="auth-back">← VendraHub home</Link>
+    <Link href="/admin/login" className="auth-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={250} height={73} priority /></Link>
+    <Link href="/admin/login" className="auth-back">← Admin portal</Link>
     <p className="auth-kicker">PRIVATE OWNER ACCESS</p><h1>Admin sign in</h1>
     <p className="auth-description">Only the designated owner account can enter the administration workspace. Password and authenticator-based MFA are required.</p>
     {error && <p className="auth-error" role="alert">{error}</p>}
