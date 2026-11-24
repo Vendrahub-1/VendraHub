@@ -9,6 +9,31 @@ export async function middleware(request: NextRequest) {
   const url = SUPABASE_URL;
   const key = SUPABASE_PUBLISHABLE_KEY;
   const pathname = request.nextUrl.pathname;
+  const hostname = request.nextUrl.hostname.toLowerCase();
+  const isAdminHost = hostname === 'admin.vendrahub.com' || hostname === 'vendrahub.vendrahub.workers.dev';
+  const isCustomerHost = hostname === 'vendrahub.com' || hostname === 'www.vendrahub.com' || hostname === 'vendrahub-customer.vendrahub.workers.dev';
+  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isCustomerPath = pathname.startsWith('/customer') || pathname.startsWith('/api/customer');
+
+  // Keep the two public experiences on separate hostnames. The root of each
+  // hostname opens its own application; cross-portal paths never render here.
+  if (isAdminHost && pathname === '/') {
+    return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+  if (isCustomerHost && pathname === '/') {
+    const destination = request.nextUrl.clone();
+    destination.pathname = '/customer';
+    return NextResponse.rewrite(destination);
+  }
+  if (isAdminHost && isCustomerPath) {
+    if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Customer API is served only from the customer storefront.' }, { status: 404 });
+    return NextResponse.redirect(new URL('/', 'https://vendrahub.com'));
+  }
+  if (isCustomerHost && isAdminPath) {
+    if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Admin API is served only from the admin portal.' }, { status: 404 });
+    return NextResponse.redirect(new URL('/', 'https://admin.vendrahub.com'));
+  }
+
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
   const isAdminLogin = pathname === '/admin/login';
   const isAdminRecovery = pathname === '/admin/recover';
@@ -100,5 +125,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*', '/customer/account/:path*', '/api/customer/:path*'],
+  matcher: ['/', '/admin/:path*', '/api/admin/:path*', '/customer/:path*', '/api/customer/:path*'],
 };
