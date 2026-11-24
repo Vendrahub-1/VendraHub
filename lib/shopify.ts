@@ -1,6 +1,9 @@
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN ?? 'vendrahub-store.myshopify.com';
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? '2026-10';
-const SHOPIFY_PRIVATE_TOKEN = process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN;
+const SHOPIFY_PRIVATE_TOKENS = [
+  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN,
+  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
+].filter((token): token is string => Boolean(token));
 
 export type StorefrontProduct = {
   id: string;
@@ -63,43 +66,60 @@ export async function searchShopifyProducts(
   search = '',
   limit = 20,
 ): Promise<StorefrontProduct[]> {
-  if (!SHOPIFY_PRIVATE_TOKEN) throw new ShopifyConfigurationError();
+  if (SHOPIFY_PRIVATE_TOKENS.length === 0) throw new ShopifyConfigurationError();
 
   const boundedLimit = Math.min(Math.max(Math.floor(limit), 1), 20);
   const endpoint = `https://${SHOPIFY_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
+  let lastAuthStatus: number | null = null;
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Shopify-Storefront-Private-Token': SHOPIFY_PRIVATE_TOKEN,
-    },
-    body: JSON.stringify({
-      query: PRODUCTS_QUERY,
-      variables: {
-        first: boundedLimit,
-        query: search.trim() ? `title:*${search.trim().slice(0, 100)}*` : null,
+  for (const token of SHOPIFY_PRIVATE_TOKENS) {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Shopify-Storefront-Private-Token': token,
       },
-    }),
-    cache: 'no-store',
-    signal: AbortSignal.timeout(10_000),
-  });
+      body: JSON.stringify({
+        query: PRODUCTS_QUERY,
+        variables: {
+          first: boundedLimit,
+          query: search.trim() ? `title:*${search.trim().slice(0, 100)}*` : null,
+        },
+      }),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10_000),
+    });
 
-  if (!response.ok) throw new Error(`Shopify request failed (${response.status}).`);
+    if (response.status === 401 || response.status === 403) {
+      lastAuthStatus = response.status;
+      continue;
+    }
 
-  const payload = (await response.json()) as ShopifyProductsResponse;
-  if (payload.errors?.length) throw new Error('Shopify returned a GraphQL error.');
+    if (!response.ok) throw new Error(`Shopify request failed (${response.status}).`);
 
-  return (payload.data?.products?.nodes ?? []).map((product) => ({
-    id: product.id,
-    title: product.title,
-    handle: product.handle,
-    description: product.description,
-    availableForSale: product.availableForSale,
-    imageUrl: product.featuredImage?.url ?? null,
-    imageAlt: product.featuredImage?.altText ?? null,
-    price: product.priceRange.minVariantPrice.amount,
-    currencyCode: product.priceRange.minVariantPrice.currencyCode,
-    variantId: product.variants.nodes[0]?.id ?? null,
-  }));
+    const payload = (await response.json()) as ShopifyProductsResponse;
+    if (payload.errors?.length) {
+      const accessDenied = payload.errors.some((item) => /access denied|unauthorized|forbidden/i.test(item.message ?? ''));
+      if (accessDenied) {
+        lastAuthStatus = 403;
+        continue;
+      }
+      throw new Error('Shopify returned a GraphQL error.');
+    }
+
+    return (payload.data?.products?.nodes ?? []).map((product) => ({
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
+      description: product.description,
+      availableForSale: product.availableForSale,
+      imageUrl: product.featuredImage?.url ?? null,
+      imageAlt: product.featuredImage?.altText ?? null,
+      price: product.priceRange.minVariantPrice.amount,
+      currencyCode: product.priceRange.minVariantPrice.currencyCode,
+      variantId: product.variants.nodes[0]?.id ?? null,
+    }));
+  }
+
+  throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
 }
