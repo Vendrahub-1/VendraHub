@@ -2,6 +2,8 @@ type ShopifyTokenResponse = {
   access_token?: string;
   expires_in?: number;
   scope?: string;
+  error?: string;
+  error_description?: string;
 };
 
 type ShopifyGraphqlResponse<T> = {
@@ -15,18 +17,22 @@ function getShopifyConfig() {
   const domain = process.env.SHOPIFY_STORE_DOMAIN?.trim().toLowerCase();
   const clientId = process.env.SHOPIFY_CLIENT_ID;
   const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
+  const adminAccessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
 
   if (!domain || !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(domain)) {
     throw new Error("Shopify store domain is missing or invalid.");
   }
-  if (!clientId || !clientSecret) {
-    throw new Error("Shopify Admin API client credentials are not configured.");
+  if (!adminAccessToken && (!clientId || !clientSecret)) {
+    throw new Error("Shopify Admin API credentials are not configured.");
   }
 
-  return { domain, clientId, clientSecret };
+  return { domain, clientId, clientSecret, adminAccessToken };
 }
 
 export async function getShopifyAdminAccessToken(): Promise<string> {
+  const adminAccessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
+  if (adminAccessToken) return adminAccessToken;
+
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
     return cachedToken.value;
   }
@@ -47,11 +53,16 @@ export async function getShopifyAdminAccessToken(): Promise<string> {
     signal: AbortSignal.timeout(10_000),
   });
 
+  const payload = (await response.json().catch(() => ({}))) as ShopifyTokenResponse;
   if (!response.ok) {
-    throw new Error(`Shopify Admin token exchange failed (${response.status}).`);
+    const errorCode =
+      typeof payload.error === "string"
+        ? payload.error
+        : typeof payload.error_description === "string"
+          ? payload.error_description.slice(0, 80)
+          : "unknown";
+    throw new Error(`Shopify Admin token exchange failed (${response.status}): ${errorCode}.`);
   }
-
-  const payload = (await response.json()) as ShopifyTokenResponse;
   if (!payload.access_token) {
     throw new Error("Shopify did not return an Admin API access token.");
   }
