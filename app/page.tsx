@@ -4,7 +4,7 @@ import Link from 'next/link';
 const pathways = [
   { eyebrow: 'CUSTOMER EXPERIENCE', title: 'Find your next favourite.', copy: 'Explore the live VendraHub collection, check availability and continue to secure Shopify checkout.', href: '/customer', action: 'Explore the store', className: 'home-pathway-shop' },
   { eyebrow: 'STORE OPERATIONS', title: 'Your store, in control.', copy: 'A protected workspace for catalogue operations, orders, customers, suppliers and store settings.', href: '/admin', action: 'Open admin workspace', className: 'home-pathway-admin' },
-];
+] as const;
 
 export default function HomePage() {
   return (
