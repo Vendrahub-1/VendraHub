@@ -53,7 +53,7 @@ export default function AdminMfaPage() {
         // An unverified factor cannot complete login and its original QR secret
         // is not returned by listFactors(). Remove only that unfinished factor,
         // then issue a fresh enrollment QR code. Never remove a verified factor.
-        const unfinished = data.totp.filter(item => item.status === 'unverified');
+        const unfinished = data.totp.filter(item => String(item.status) === 'unverified');
         for (const pending of unfinished) {
           const { error: removeError } = await supabase.auth.mfa.unenroll({ factorId: pending.id });
           if (removeError) throw new Error('Could not safely reset the unfinished authenticator setup. Please retry or contact support.');
