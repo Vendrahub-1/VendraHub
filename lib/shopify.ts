@@ -1,9 +1,12 @@
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN ?? 'vendrahub-store.myshopify.com';
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? '2026-10';
-const SHOPIFY_PRIVATE_TOKENS = [
-  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN,
-  process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
-].filter((token): token is string => Boolean(token));
+const SHOPIFY_TOKEN_CANDIDATES = [
+  { token: process.env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN, header: 'X-Shopify-Storefront-Access-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN, header: 'Shopify-Storefront-Private-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1, header: 'Shopify-Storefront-Private-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN, header: 'X-Shopify-Storefront-Access-Token' },
+  { token: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1, header: 'X-Shopify-Storefront-Access-Token' },
+].filter((candidate): candidate is { token: string; header: string } => Boolean(candidate.token));
 
 export type StorefrontProduct = {
   id: string;
@@ -66,18 +69,18 @@ export async function searchShopifyProducts(
   search = '',
   limit = 20,
 ): Promise<StorefrontProduct[]> {
-  if (SHOPIFY_PRIVATE_TOKENS.length === 0) throw new ShopifyConfigurationError();
+  if (SHOPIFY_TOKEN_CANDIDATES.length === 0) throw new ShopifyConfigurationError();
 
   const boundedLimit = Math.min(Math.max(Math.floor(limit), 1), 20);
   const endpoint = `https://${SHOPIFY_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
   let lastAuthStatus: number | null = null;
 
-  for (const token of SHOPIFY_PRIVATE_TOKENS) {
+  for (const candidate of SHOPIFY_TOKEN_CANDIDATES) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Shopify-Storefront-Private-Token': token,
+        [candidate.header]: candidate.token,
       },
       body: JSON.stringify({
         query: PRODUCTS_QUERY,
