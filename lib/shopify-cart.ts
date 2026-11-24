@@ -77,5 +77,20 @@ export async function createShopifyCheckout(lines: CartLine[]) {
     return { cartId: result.cart.id, checkoutUrl: checkout.toString() };
   }
 
-  throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
+  // Shopify cart permalinks provide a secure checkout fallback when Storefront API credentials are unavailable.
+  // Shopify hosts the cart and checkout; this only creates a URL and never places an order or charges the buyer.
+  const permalinkItems = normalized.map((line) => {
+    const variantId = line.merchandiseId.split('/').pop();
+    if (!variantId || !/^\d+$/.test(variantId)) {
+      throw new Error('Invalid Shopify product variant identifier.');
+    }
+    return `${variantId}:${line.quantity}`;
+  });
+  const checkoutUrl = new URL(`/cart/${permalinkItems.join(',')}`, `https://${SHOPIFY_DOMAIN}`);
+
+  if (checkoutUrl.protocol !== 'https:' || !checkoutUrl.hostname.endsWith('.myshopify.com')) {
+    throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
+  }
+
+  return { cartId: null, checkoutUrl: checkoutUrl.toString() };
 }
