@@ -18,9 +18,7 @@ export async function middleware(request: NextRequest) {
   // Keep the two public experiences on separate hostnames. The root of each
   // hostname opens its own application; cross-portal paths never render here.
   if (isAdminHost && pathname === '/') {
-    const destination = request.nextUrl.clone();
-    destination.pathname = '/admin/login';
-    return NextResponse.rewrite(destination);
+    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
   if (isCustomerHost && pathname === '/') {
     const destination = request.nextUrl.clone();
