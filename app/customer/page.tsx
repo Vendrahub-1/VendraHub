@@ -16,11 +16,17 @@ function formatPrice(amount: string, currency: string) {
 export default async function CustomerPage({ searchParams }: CustomerPageProps) {
   const params = await searchParams;
   const query = typeof params.q === 'string' ? params.q.trim().slice(0, 100) : '';
+  let productsUnavailable = false;
   const products = await searchShopifyProducts(query, 20).catch((error: unknown) => {
-    if (!(error instanceof ShopifyConfigurationError)) console.error('Could not render Shopify products:', error);
+    if (!(error instanceof ShopifyConfigurationError)) {
+      productsUnavailable = true;
+      console.error('Could not render Shopify products:', error instanceof Error ? error.message : String(error));
+    }
     return [];
   });
-  const shopifyReady = Boolean(process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN);
+  const shopifyReady = Boolean(
+    process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN || process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN_1,
+  );
 
   return (
     <main className="vh-store">
@@ -38,7 +44,8 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
         <div className="vh-collection-heading"><div><p className="vh-overline">SHOP VENDRAHUB</p><h2>{query ? `Results for “${query}”` : 'The live collection'}</h2><p>Product availability and pricing are synced from Shopify.</p></div><form action="/customer" method="get" className="vh-search"><label className="vh-visually-hidden" htmlFor="store-search">Search products</label><input id="store-search" name="q" type="search" defaultValue={query} placeholder="Search products..." /><button type="submit" aria-label="Search products">Search ↗</button></form></div>
 
         {!shopifyReady && <div className="vh-store-message" role="status">Shopify storefront credentials are not configured. Add the server-side Storefront API token to enable live products.</div>}
-        {shopifyReady && products.length === 0 && <div className="vh-store-message" role="status">{query ? 'No matching products were found. Try another search.' : 'There are no active products available right now.'}</div>}
+        {shopifyReady && productsUnavailable && <div className="vh-store-message" role="status">We’re having trouble connecting to Shopify right now. Please try again shortly.</div>}
+        {shopifyReady && !productsUnavailable && products.length === 0 && <div className="vh-store-message" role="status">{query ? 'No matching products were found. Try another search.' : 'There are no active products available right now.'}</div>}
 
         <div className="vh-product-grid">
           {products.map((product, index) => (
