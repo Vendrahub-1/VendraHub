@@ -40,7 +40,11 @@ const PUBLIC_PRODUCTS_QUERY = `
 `;
 
 export async function GET(request: NextRequest) {
-  if (!process.env.SHOPIFY_CLIENT_ID || !process.env.SHOPIFY_CLIENT_SECRET) {
+  const hasAdminAccessToken = Boolean(process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim());
+  const hasClientCredentials = Boolean(
+    process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET,
+  );
+  if (!hasAdminAccessToken && !hasClientCredentials) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 
