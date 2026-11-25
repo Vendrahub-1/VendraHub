@@ -86,7 +86,7 @@ export async function searchShopifyProducts(
         query: PRODUCTS_QUERY,
         variables: {
           first: boundedLimit,
-          query: search.trim() ? `title:*${search.trim().slice(0, 100)}*` : null,
+          query: search.trim() ? search.trim().slice(0, 100).replace(/[\\\\:()]/g, '\\\\query: search.trim() ? `title:*${search.trim().slice(0, 100)}*` : null,') : null,
         },
       }),
       cache: 'no-store',
@@ -110,7 +110,11 @@ export async function searchShopifyProducts(
       throw new Error('Shopify returned a GraphQL error.');
     }
 
-    return (payload.data?.products?.nodes ?? []).map((product) => ({
+    if (!payload.data?.products) {
+      throw new Error('Shopify returned an incomplete product response.');
+    }
+
+    return payload.data.products.nodes.map((product) => ({
       id: product.id,
       title: product.title,
       handle: product.handle,
