@@ -48,8 +48,10 @@ export async function verifyAdminRecoveryProof(
   const signature = fromHex(signatureHex);
   if (!signature) return false;
   const payload = `${expiresAtText}.${proofUserId}`;
+  const signatureBuffer = new Uint8Array(signature).buffer;
+  const payloadBuffer = new TextEncoder().encode(payload).buffer;
   try {
-    return await crypto.subtle.verify('HMAC', await recoveryKey(secret), signature, new TextEncoder().encode(payload));
+    return await crypto.subtle.verify('HMAC', await recoveryKey(secret), signatureBuffer, payloadBuffer);
   } catch {
     return false;
   }
