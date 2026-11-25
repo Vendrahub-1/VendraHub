@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import SignOutButton from '@/components/sign-out-button';
+import AdminPwaControls from '@/components/admin/admin-pwa-controls';
 
 export const adminSections = [
   { id: 'overview', label: 'Overview', href: '/admin' },
@@ -41,7 +42,7 @@ export default function AdminWorkspace({ active, title, children }: { active: st
           <div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>{title}</strong></div>
           <div className="topbar-actions">
             <Link className="admin-ai-entry" href="/admin/assistant">✦ AI Assistant</Link>
-            <span className="preview-chip">OWNER WORKSPACE</span>
+            <AdminPwaControls /><span className="preview-chip">OWNER WORKSPACE</span>
             <SignOutButton />
             <a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a>
           </div>
