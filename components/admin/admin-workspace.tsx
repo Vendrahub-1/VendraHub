@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Route } from 'next';
 import SignOutButton from '@/components/sign-out-button';
 import AdminPwaControls from '@/components/admin/admin-pwa-controls';
 
@@ -30,7 +31,7 @@ export default function AdminWorkspace({ active, title, children }: { active: st
         <div className="sidebar-label">WORKSPACE</div>
         <nav aria-label="Admin navigation" className="admin-nav">
           {adminSections.map((item, index) => (
-            <Link key={item.id} href={item.href} className={active === item.id ? 'active' : ''} aria-current={active === item.id ? 'page' : undefined}>
+            <Link key={item.id} href={item.href as Route} className={active === item.id ? 'active' : ''} aria-current={active === item.id ? 'page' : undefined}>
               <span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{item.label}
             </Link>
           ))}
