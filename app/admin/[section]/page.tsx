@@ -52,7 +52,7 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
     const columns = (config.columns ?? []).map(column => column.key).join(',');
     const result = await supabase.from(config.table).select(columns).order(config.orderBy ?? 'created_at', { ascending: false }).limit(12);
     if (result.error) errorMessage = 'The current owner session could not read this data under the active database policies.';
-    else rows = (result.data ?? []) as Row[];
+    else rows = (result.data ?? []) as unknown as Row[];
   }
 
   return (
