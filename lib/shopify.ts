@@ -119,7 +119,7 @@ export async function searchShopifyProducts(
       throw new Error('Shopify returned an incomplete product response.');
     }
 
-    return payload.data.products.nodes.map((product) => ({
+    return (payload.data.products.nodes ?? []).map((product) => ({
       id: product.id,
       title: product.title,
       handle: product.handle,
