@@ -40,13 +40,13 @@ export default async function AdminPage() {
         <Link href="/" className="admin-brand"><Image src="/vendrahub-icon.svg" alt="" width={44} height={44} priority className="admin-brand-icon" /><span><strong>VendraHub</strong><small>ADMIN CONSOLE</small></span></Link>
         <div className="sidebar-label">WORKSPACE</div>
         <nav aria-label="Admin navigation" className="admin-nav">
-          {nav.map(([label, id], index) => <a key={id} href={'#' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
+          {nav.map(([label, id], index) => <a key={id} href={id === 'overview' ? '/admin' : '/admin/' + id} className={index === 0 ? 'active' : ''}><span className="nav-dot">{String(index + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
         <div className="sidebar-bottom"><span className="status-dot" /> Protected owner session <small>Authenticator verification required</small></div>
       </aside>
 
       <div className="admin-main">
-        <header className="admin-topbar"><div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>Store control center</strong></div><div className="topbar-actions"><span className="preview-chip">OWNER WORKSPACE</span><SignOutButton /><a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a></div></header>
+        <header className="admin-topbar"><div><span className="topbar-overline">VENDRAHUB / ADMIN</span><strong>Store control center</strong></div><div className="topbar-actions"><Link className="admin-ai-entry" href="/admin/assistant">✦ AI Assistant</Link><span className="preview-chip">OWNER WORKSPACE</span><SignOutButton /><a href="https://admin.shopify.com/store/vendrahub-store" target="_blank" rel="noreferrer">Shopify Admin ↗</a></div></header>
         <div className="admin-content">
           <section id="overview" className="admin-welcome"><div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Good day. <span>Here is your store overview.</span></h1><p>Your administration workspace. Live business figures will appear when authenticated data services are connected.</p></div><div className="welcome-date">VENDRAHUB<br/><strong>ADMINISTRATION</strong></div></section>
 
