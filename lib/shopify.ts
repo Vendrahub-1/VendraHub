@@ -86,7 +86,7 @@ export async function searchShopifyProducts(
         query: PRODUCTS_QUERY,
         variables: {
           first: boundedLimit,
-          query: search.trim() ? search.trim().slice(0, 100).replace(/[\\\\:()]/g, '\\\\query: search.trim() ? `title:*${search.trim().slice(0, 100)}*` : null,') : null,
+          query: search.trim() ? search.trim().slice(0, 100).replace(/[\\:()]/g, (character) => "\\" + character) : null,
         },
       }),
       cache: 'no-store',
