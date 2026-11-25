@@ -5,13 +5,13 @@ import { createClient } from '@/lib/supabase/server';
 
 type Row = Record<string, string | number | null>;
 
-const pageConfig: Record<string, { title: string; description: string; table?: string; columns?: { key: string; label: string }[] }> = {
+const pageConfig: Record<string, { title: string; description: string; table?: string; columns?: { key: string; label: string }[]; orderBy?: string }> = {
   products: { title: 'Products', description: 'Catalogue, variants, pricing, product approval and publication.', table: 'products', columns: [{key:'title',label:'Product'},{key:'vendor',label:'Brand / vendor'},{key:'product_type',label:'Category'},{key:'status',label:'Status'}] },
   orders: { title: 'Orders', description: 'Review orders, payment status, returns and fulfilment.', table: 'orders', columns: [{key:'order_number',label:'Order'},{key:'currency',label:'Currency'},{key:'total',label:'Total'},{key:'payment_status',label:'Payment'},{key:'fulfillment_status',label:'Fulfilment'}] },
   customers: { title: 'Customers', description: 'Customer account totals and privacy-conscious account operations.', table: 'customers', columns: [{key:'first_name',label:'First name'},{key:'last_name',label:'Last name'},{key:'country',label:'Country'},{key:'customer_status',label:'Status'}] },
   suppliers: { title: 'Suppliers', description: 'Connection health, supplier catalogue and order readiness.', table: 'supplier_connections', columns: [{key:'supplier_code',label:'Supplier'},{key:'integration_method',label:'Connection method'},{key:'connection_status',label:'Status'},{key:'last_checked_at',label:'Last checked'}] },
-  inventory: { title: 'Inventory', description: 'Stock visibility and supplier-reported quantities. Changes remain approval-gated.', table: 'inventory_items', columns: [{key:'variant_id',label:'Variant'},{key:'available_quantity',label:'Available'},{key:'supplier_reported',label:'Supplier reported'},{key:'checked_at',label:'Last checked'}] },
-  finance: { title: 'Sales & Finance', description: 'Sales records and currency-aware financial reporting.', table: 'sales_records', columns: [{key:'order_id',label:'Order reference'},{key:'gross_sales',label:'Gross sales'},{key:'currency',label:'Currency'},{key:'recorded_at',label:'Recorded'}] },
+  inventory: { title: 'Inventory', description: 'Stock visibility and supplier-reported quantities. Changes remain approval-gated.', table: 'inventory_items', orderBy: 'checked_at', columns: [{key:'variant_id',label:'Variant'},{key:'available_quantity',label:'Available'},{key:'supplier_reported',label:'Supplier reported'},{key:'checked_at',label:'Last checked'}] },
+  finance: { title: 'Sales & Finance', description: 'Sales records and currency-aware financial reporting.', table: 'sales_records', orderBy: 'recorded_at', columns: [{key:'order_id',label:'Order reference'},{key:'gross_sales',label:'Gross sales'},{key:'currency',label:'Currency'},{key:'recorded_at',label:'Recorded'}] },
   support: { title: 'Customer Support', description: 'Support requests, ownership and resolution status.', table: 'support_tickets', columns: [{key:'subject',label:'Subject'},{key:'status',label:'Status'},{key:'created_at',label:'Created'}] },
   staff: { title: 'Staff & Access', description: 'Administrator identities, assigned roles and access posture.', table: 'admin_profiles', columns: [{key:'display_name',label:'Administrator'},{key:'staff_status',label:'Staff status'},{key:'created_at',label:'Added'}] },
   notifications: { title: 'Notifications', description: 'System alerts and operational notices.', table: 'system_alerts', columns: [{key:'source',label:'Source'},{key:'severity',label:'Severity'},{key:'message',label:'Message'},{key:'created_at',label:'Created'}] },
@@ -50,7 +50,7 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
     const countResult = await supabase.from(config.table).select('*', { count: 'exact', head: true });
     count = countResult.count ?? 0;
     const columns = (config.columns ?? []).map(column => column.key).join(',');
-    const result = await supabase.from(config.table).select(columns).order('created_at', { ascending: false }).limit(12);
+    const result = await supabase.from(config.table).select(columns).order(config.orderBy ?? 'created_at', { ascending: false }).limit(12);
     if (result.error) errorMessage = 'The current owner session could not read this data under the active database policies.';
     else rows = (result.data ?? []) as Row[];
   }
