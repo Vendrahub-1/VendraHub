@@ -1,0 +1,14 @@
+{
+  "id": "/admin",
+  "name": "VendraHub Admin",
+  "short_name": "VendraHub",
+  "description": "VendraHub fashion and lifestyle marketplace administration.",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#f5f4f0",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/vendrahub-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
