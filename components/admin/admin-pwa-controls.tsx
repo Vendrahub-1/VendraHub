@@ -10,7 +10,7 @@ export default function AdminPwaControls() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin' }).catch(() => undefined);
+      navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin/' }).catch(() => undefined);
     }
     const onPrompt = (event: Event) => {
       event.preventDefault();
