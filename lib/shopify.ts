@@ -58,6 +58,11 @@ const PRODUCTS_QUERY = `
   }
 `;
 
+function escapeShopifySearchQuery(value: string): string {
+  // Shopify search syntax treats these characters as operators unless escaped.
+  return value.replace(/[\\:()]/g, (character) => "\\" + character);
+}
+
 export class ShopifyConfigurationError extends Error {
   constructor() {
     super('Shopify Storefront API is not configured.');
@@ -86,7 +91,7 @@ export async function searchShopifyProducts(
         query: PRODUCTS_QUERY,
         variables: {
           first: boundedLimit,
-          query: search.trim() ? search.trim().slice(0, 100).replace(/[\\:()]/g, (character) => "\\" + character) : null,
+          query: search.trim() ? escapeShopifySearchQuery(search.trim().slice(0, 100)) : null,
         },
       }),
       cache: 'no-store',
