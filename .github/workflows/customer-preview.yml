@@ -64,12 +64,12 @@ jobs:
         run: |
           set -e
           for route in /customer /customer/categories /customer/wishlist /customer/orders /customer/cart /customer/login /customer/account; do
-            status="$(curl -sS -o /tmp/vendrahub-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL$route")"
-            echo "$route returned HTTP $status"
-            case "$status" in
-              200|301|302|307|308) ;;
-              *) echo "::error::Unexpected HTTP status $status for $route"; exit 1 ;;
-            esac
+            status="$(curl -sS -L --max-redirs 5 -o /tmp/vendrahub-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL$route")"
+  echo "$route returned final HTTP $status"
+  case "$status" in
+    200) ;;
+    *) echo "::error::Unexpected final HTTP status $status for $route"; exit 1 ;;
+  esac
           done
 
       - name: Publish preview URL
