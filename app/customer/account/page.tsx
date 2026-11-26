@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import SignOutButton from '@/components/sign-out-button';
+import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 
 type Profile = { full_name: string | null; avatar_url?: string | null };
 type Ticket = { id: string; subject: string; status: string; created_at: string };
@@ -16,9 +16,7 @@ const emptyAddress = { label: 'Home', recipient_name: '', phone: '', address_lin
 const navigation = [
   { id: 'profile', label: 'Personal details', short: 'Profile', mark: '01' },
   { id: 'addresses', label: 'Delivery addresses', short: 'Addresses', mark: '02' },
-  { id: 'wishlist', label: 'Wishlist', short: 'Wishlist', mark: '03' },
   { id: 'support', label: 'Customer support', short: 'Support', mark: '04' },
-  { id: 'orders', label: 'Order history', short: 'Orders', mark: '05' },
 ];
 
 export default function CustomerAccountPage() {
@@ -28,6 +26,7 @@ export default function CustomerAccountPage() {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +41,7 @@ export default function CustomerAccountPage() {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!user) { window.location.assign('/customer/login'); return; }
+      if (!user) { setIsGuest(true); return; }
       setEmail(user.email ?? '');
       const [p, t, w, a] = await Promise.all([
         supabase.from('profiles').select('full_name,avatar_url').eq('id', user.id).maybeSingle(),
@@ -145,16 +144,20 @@ export default function CustomerAccountPage() {
 
   if (loading) return <main className="customer-loading"><div className="customer-loading-mark">VH</div><p>Preparing your VendraHub account…</p></main>;
 
+  if (isGuest) return (
+    <main className="customer-account-shell">
+      <header className="customer-account-header"><Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority /></Link></header>
+      <section className="customer-account-hero"><div className="customer-account-hero-copy"><p className="customer-overline">YOUR VENDRAHUB SPACE</p><h1>Your account<span>.</span></h1><p className="customer-account-welcome">Sign in or create an account to manage your details, addresses and support requests.</p><div className="customer-guest-actions"><Link href="/customer/login" className="customer-primary-button">Login →</Link><Link href="/customer/login?mode=signup" className="customer-guest-register">Register</Link></div></div><div className="customer-hero-watermark" aria-hidden="true">VH</div></section>
+      <CustomerBottomNav active="Account" />
+    </main>
+  );
+
   return (
     <main className="customer-account-shell">
       <header className="customer-account-header">
         <Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop">
           <Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority />
         </Link>
-        <div className="customer-account-header-actions">
-          <Link href="/customer" className="customer-continue-link"><span aria-hidden="true">←</span> Continue shopping</Link>
-          <SignOutButton />
-        </div>
       </header>
 
       <section className="customer-account-hero">
@@ -176,30 +179,7 @@ export default function CustomerAccountPage() {
       {error && <p className="customer-feedback customer-feedback-error" role="alert">{error}</p>}
 
       <div className="customer-account-layout">
-        <aside className="customer-account-sidebar">
-          <p className="customer-sidebar-title">ACCOUNT MENU</p>
-          <nav className="customer-account-nav" aria-label="Customer account sections">
-            {navigation.map(item => (
-              <a
-                href={'#' + item.id}
-                key={item.id}
-                className={activeSection === item.id ? 'is-active' : undefined}
-                aria-current={activeSection === item.id ? 'location' : undefined}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <span className="customer-nav-number">{item.mark}</span>
-                <span>{item.short}</span>
-                <span className="customer-nav-arrow" aria-hidden="true">↗</span>
-              </a>
-            ))}
-          </nav>
-          <div className="customer-sidebar-help">
-            <span className="customer-help-icon" aria-hidden="true">?</span>
-            <strong>Need a hand?</strong>
-            <p>Our support team is here to help with your VendraHub experience.</p>
-            <a href="#support">Contact support <span aria-hidden="true">→</span></a>
-          </div>
-        </aside>
+
 
         <div className="customer-account-content">
           <section id="profile" className="customer-account-section">
@@ -243,13 +223,7 @@ export default function CustomerAccountPage() {
             </form>
           </section>
 
-          <section id="wishlist" className="customer-account-section">
-            <div className="customer-section-topline"><span>03 / SAVED ITEMS</span><span>YOUR SHORTLIST</span></div>
-            <div className="customer-section-heading"><div><h2>Your wishlist</h2><p>Keep the products you love close at hand.</p></div><span className="customer-section-symbol" aria-hidden="true">♡</span></div>
-            {wishlist.length ? <ul className="customer-wishlist-list">{wishlist.map(item => (
-              <li key={item.id}><span className="customer-wishlist-icon" aria-hidden="true">♡</span><div><strong>Saved Shopify product</strong><small>Product reference: {item.shopify_product_gid.split('/').pop()}</small><small>Saved {new Date(item.created_at).toLocaleDateString()}</small></div><button type="button" className="customer-remove-link" onClick={() => removeWishlist(item.shopify_product_gid)} disabled={busy}>Remove</button></li>
-            ))}</ul> : <div className="customer-empty-state"><span aria-hidden="true">♡</span><strong>Your wishlist is waiting</strong><p>Save products while shopping and they will appear here.</p><Link href="/customer">Explore the collection <span aria-hidden="true">→</span></Link></div>}
-          </section>
+
 
           <section id="support" className="customer-account-section">
             <div className="customer-section-topline"><span>04 / WE ARE HERE</span><span>CUSTOMER CARE</span></div>
@@ -263,15 +237,11 @@ export default function CustomerAccountPage() {
             {tickets.length ? <ul className="customer-support-list">{tickets.map(ticket => <li key={ticket.id}><div><strong>{ticket.subject}</strong><small>Submitted {new Date(ticket.created_at).toLocaleDateString()}</small></div><span className="customer-ticket-status">{ticket.status.replaceAll('_', ' ')}</span></li>)}</ul> : <p className="customer-inline-empty">No support requests yet.</p>}
           </section>
 
-          <section id="orders" className="customer-account-section">
-            <div className="customer-section-topline"><span>05 / YOUR PURCHASES</span><span>ORDER TRACKING</span></div>
-            <div className="customer-section-heading"><div><h2>Order history</h2><p>Your purchases and delivery updates will live here.</p></div><span className="customer-section-symbol" aria-hidden="true">▤</span></div>
-            <div className="customer-integration-notice"><span aria-hidden="true">i</span><div><strong>Shopify order access is not connected yet</strong><p>Order history will appear after the Shopify customer and order integration is authorised. No order data is being simulated.</p></div></div>
-            <Link href="/customer" className="customer-secondary-link">Continue shopping <span aria-hidden="true">→</span></Link>
-          </section>
+
         </div>
       </div>
       <footer className="customer-account-footer"><Link href="/customer">VENDRAHUB</Link><span>SHOP SMART. LIVE STYLISH.</span><a href="#profile">Back to top ↑</a></footer>
+      <CustomerBottomNav active="Account" />
     </main>
   );
 }
