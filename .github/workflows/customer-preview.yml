@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/customer-cloudflare-preview-deploy
+      - feat/customer-storefront-navigation
   workflow_dispatch:
 
 permissions:
@@ -62,7 +63,7 @@ jobs:
           PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
         run: |
           set -e
-          for route in /customer /customer/account /customer/login; do
+          for route in /customer /customer/categories /customer/cart /customer/login /customer/account; do
             status="$(curl -sS -o /tmp/vendrahub-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL$route")"
             echo "$route returned HTTP $status"
             case "$status" in
