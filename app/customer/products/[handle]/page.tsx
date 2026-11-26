@@ -28,7 +28,6 @@ export default async function CustomerProductDetail({ params }: { params: Promis
     <main className="vh-store vh-product-detail-page">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <nav aria-label="Store navigation"><Link href="/customer/categories">Categories</Link><Link href="/customer/account">My account</Link><Link href="/customer/cart" className="vh-store-signin">Shopping bag</Link></nav>
       </header>
       <p className="vh-breadcrumb"><Link href="/customer">Home</Link> / <Link href="/customer/categories">Shop</Link> / {product.title}</p>
       <section className="vh-product-detail">
