@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
+import CustomerSidebar from '@/components/storefront/customer-sidebar';
 import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
@@ -22,7 +23,7 @@ export default async function CustomerCategoriesPage() {
     <main className="vh-store">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        
+        <CustomerSidebar />
       </header>
       <section className="vh-secondary-hero">
         <p className="vh-overline">FIND YOUR STYLE</p><h1>Explore the<br/><em>collections.</em></h1>
