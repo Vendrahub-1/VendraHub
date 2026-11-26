@@ -1,0 +1,90 @@
+name: VendraHub customer Cloudflare preview
+
+on:
+  push:
+    branches:
+      - fix/customer-cloudflare-preview-deploy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendrahub-customer-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy-customer-preview:
+    name: Build and deploy customer preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Initialize Cloudflare Workers build
+        env:
+          CF_WORKER_NAME: vendrahub-customer
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUSTOMER_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "::error::Missing CLOUDFLARE_CUSTOMER_API_TOKEN repository secret" && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "::error::Missing CLOUDFLARE_ACCOUNT_ID repository secret" && exit 1)
+          npx --yes vinext init --platform=cloudflare --name=vendrahub-customer --cdn-cache=none --data-cache=none --image-optimization=none --no-prerender --force
+          node scripts/prepare-cloudflare-vinext.mjs
+
+      - name: Build and deploy isolated customer preview
+        id: deploy
+        env:
+          CF_WORKER_NAME: vendrahub-customer
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUSTOMER_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx @vinext/cloudflare previews deploy --preview-name customer-account-portal 2>&1 | tee customer-preview-deploy.log
+          PREVIEW_URL="$(grep -Eo 'https://[a-zA-Z0-9.-]+\.workers\.dev' customer-preview-deploy.log | tail -n 1)"
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error::Cloudflare did not print a preview URL."
+            exit 1
+          fi
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+          echo "Customer preview: $PREVIEW_URL"
+
+      - name: Smoke-test storefront and account routes
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+        run: |
+          set -e
+          for route in /customer /customer/account /customer/login; do
+            status="$(curl -sS -o /tmp/vendrahub-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL$route")"
+            echo "$route returned HTTP $status"
+            case "$status" in
+              200|301|302|307|308) ;;
+              *) echo "::error::Unexpected HTTP status $status for $route"; exit 1 ;;
+            esac
+          done
+
+      - name: Publish preview URL
+        if: success()
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+        run: |
+          {
+            echo "## VendraHub customer preview"
+            echo ""
+            echo "Preview URL: $PREVIEW_URL"
+            echo ""
+            echo "- Storefront: $PREVIEW_URL/customer"
+            echo "- Customer account: $PREVIEW_URL/customer/account"
+            echo "- Customer sign-in: $PREVIEW_URL/customer/login"
+            echo ""
+            echo "Smoke checks passed. Sign in with your own customer account to test authenticated sections."
+          } >> "$GITHUB_STEP_SUMMARY"
