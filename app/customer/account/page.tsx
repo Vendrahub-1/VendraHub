@@ -146,7 +146,7 @@ export default function CustomerAccountPage() {
 
   if (isGuest) return (
     <main className="customer-account-shell">
-      <header className="customer-account-header"><Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority /></Link><CustomerSidebar /></header>
+      <header className="customer-account-header"><Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority /></Link></header>
       <section className="customer-account-hero"><div className="customer-account-hero-copy"><p className="customer-overline">YOUR VENDRAHUB SPACE</p><h1>Your account<span>.</span></h1><p className="customer-account-welcome">Sign in or create an account to manage your details, addresses and support requests.</p><div className="customer-guest-actions"><Link href="/customer/login" className="customer-primary-button">Login →</Link><Link href="/customer/login?mode=signup" className="customer-guest-register">Register</Link></div></div><div className="customer-hero-watermark" aria-hidden="true">VH</div></section>
       <CustomerBottomNav active="Account" />
     </main>
