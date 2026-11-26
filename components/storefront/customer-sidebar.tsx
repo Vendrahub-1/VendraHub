@@ -108,7 +108,7 @@ export default function CustomerSidebar() {
         <nav aria-label="Secondary customer navigation">
           {secondaryLinks.map(item => {
             const targetPath = item.href.split('#')[0];
-            const active = pathname === targetPath;
+            const active = !item.href.includes('#') && pathname === targetPath;
             return (
               <Link
                 href={item.href}
