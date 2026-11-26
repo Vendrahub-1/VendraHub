@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import SignOutButton from '@/components/sign-out-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 
 type Profile = { full_name: string | null; avatar_url?: string | null };
@@ -27,6 +26,7 @@ export default function CustomerAccountPage() {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
@@ -41,7 +41,7 @@ export default function CustomerAccountPage() {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!user) { window.location.assign('/customer/login'); return; }
+      if (!user) { setIsGuest(true); return; }
       setEmail(user.email ?? '');
       const [p, t, w, a] = await Promise.all([
         supabase.from('profiles').select('full_name,avatar_url').eq('id', user.id).maybeSingle(),
@@ -144,16 +144,20 @@ export default function CustomerAccountPage() {
 
   if (loading) return <main className="customer-loading"><div className="customer-loading-mark">VH</div><p>Preparing your VendraHub account…</p></main>;
 
+  if (isGuest) return (
+    <main className="customer-account-shell">
+      <header className="customer-account-header"><Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority /></Link></header>
+      <section className="customer-account-hero"><div className="customer-account-hero-copy"><p className="customer-overline">YOUR VENDRAHUB SPACE</p><h1>Your account<span>.</span></h1><p className="customer-account-welcome">Sign in or create an account to manage your details, addresses and support requests.</p><div className="customer-guest-actions"><Link href="/customer/login" className="customer-primary-button">Login →</Link><Link href="/customer/login?mode=signup" className="customer-guest-register">Register</Link></div></div><div className="customer-hero-watermark" aria-hidden="true">VH</div></section>
+      <CustomerBottomNav active="Account" />
+    </main>
+  );
+
   return (
     <main className="customer-account-shell">
       <header className="customer-account-header">
         <Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop">
           <Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority />
         </Link>
-        <div className="customer-account-header-actions">
-          <Link href="/customer" className="customer-continue-link"><span aria-hidden="true">←</span> Continue shopping</Link>
-          <SignOutButton />
-        </div>
       </header>
 
       <section className="customer-account-hero">
