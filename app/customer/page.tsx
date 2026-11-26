@@ -3,6 +3,7 @@ import Link from 'next/link';
 import CheckoutButton from '@/components/storefront/checkout-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 import CustomerSidebar from '@/components/storefront/customer-sidebar';
+import CustomerHomeNotifications from '@/components/storefront/customer-home-notifications';
 import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +37,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
     <main className="vh-store">
       <header className="vh-store-header">
         <Link href="/" className="vh-store-brand" aria-label="VendraHub home"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <CustomerSidebar />
+        <div className="vh-home-header-actions"><CustomerHomeNotifications /><CustomerSidebar /></div>
       </header>
 
       <section className="vh-store-hero">
