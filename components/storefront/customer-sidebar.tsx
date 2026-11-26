@@ -36,11 +36,17 @@ export default function CustomerSidebar() {
       {open && <button type="button" className="vh-customer-menu-backdrop" aria-label="Close sidebar" onClick={() => setOpen(false)} />}
       <aside className={open ? 'vh-customer-sidebar is-open' : 'vh-customer-sidebar'} aria-label="Customer sidebar" aria-hidden={!open}>
         <div className="vh-customer-sidebar-head"><strong>VendraHub</strong><button type="button" onClick={() => setOpen(false)} aria-label="Close sidebar">×</button></div>
-        <nav>
+        <nav aria-label="Customer secondary navigation">
+          <p className="vh-customer-sidebar-label">SHOP</p>
           <Link href="/customer/categories" onClick={() => setOpen(false)}>Explore categories</Link>
-          <Link href="/customer/wishlist" onClick={() => setOpen(false)}>My wishlist</Link>
-          <Link href="/customer/orders" onClick={() => setOpen(false)}>My orders</Link>
-          <Link href="/customer/account" onClick={() => setOpen(false)}>Account details</Link>
+          <Link href="/customer/cart" onClick={() => setOpen(false)}>Shopping bag</Link>
+          <Link href="/customer/wishlist" onClick={() => setOpen(false)}>Saved items / Wishlist</Link>
+          <p className="vh-customer-sidebar-label">YOUR ORDERS</p>
+          <Link href="/customer/orders" onClick={() => setOpen(false)}>Order history & tracking</Link>
+          <Link href="/customer/orders#returns" onClick={() => setOpen(false)}>Returns & refunds</Link>
+          <p className="vh-customer-sidebar-label">ACCOUNT & HELP</p>
+          <Link href="/customer/account#profile" onClick={() => setOpen(false)}>Personal details</Link>
+          <Link href="/customer/account#addresses" onClick={() => setOpen(false)}>Delivery addresses</Link>
           <Link href="/customer/account#support" onClick={() => setOpen(false)}>Customer support</Link>
         </nav>
         {signedIn && <button type="button" className="vh-customer-sidebar-logout" onClick={signOut} disabled={busy}>{busy ? 'Signing out…' : 'Log out'}</button>}
