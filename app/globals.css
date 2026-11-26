@@ -609,3 +609,165 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 @media(max-width:760px){.admin-ai-layout{grid-template-columns:1fr}.admin-screen-heading{align-items:flex-start;flex-direction:column}.admin-screen-footer{flex-direction:column}.admin-ai-input{align-items:stretch;flex-direction:column}.admin-ai-input button{width:100%}.admin-ai-entry{font-size:10px;padding:0 9px}.admin-topbar{flex-wrap:wrap}}
 
 .admin-install-button{min-height:34px;padding:0 12px;border:1px solid #c9a227;border-radius:999px;background:#fff;color:#6d5518;font-size:10px;font-weight:800;white-space:nowrap}.admin-installed-label{color:#6d5518;font-size:10px;font-weight:800;white-space:nowrap}
+
+
+/* Customer account portal — responsive editorial refresh */
+.customer-account-shell{width:min(1240px,100%);margin:0 auto;padding:26px clamp(16px,4vw,46px) 30px;color:#1b1b19}
+.customer-account-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 0 22px;border-bottom:1px solid #e9e5db}
+.customer-account-brand{display:inline-flex;align-items:center;min-width:0}
+.customer-account-brand img{display:block;width:min(190px,42vw);height:auto;object-fit:contain}
+.customer-account-header-actions{display:flex;align-items:center;gap:18px}
+.customer-continue-link{font-size:12px;font-weight:700;color:#5c4b1e;white-space:nowrap}
+.customer-continue-link span{margin-right:7px}
+.customer-account-header .signout-button{border-color:#ded6c2;color:#393321;padding:9px 13px}
+.customer-account-hero{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:220px;margin:28px 0 22px;padding:36px clamp(22px,5vw,54px);border-radius:18px;background:#171713;color:#fff}
+.customer-account-hero-copy,.customer-account-hero-side{position:relative;z-index:1}
+.customer-overline{margin:0 0 15px;color:#d9bd68;font-size:9px;font-weight:800;letter-spacing:.2em}
+.customer-account-hero h1{margin:0 0 13px;color:#fff;font-family:Georgia,serif;font-size:clamp(34px,5vw,54px);font-weight:400;letter-spacing:-.045em}
+.customer-account-hero h1 span{color:#d7b957}
+.customer-account-welcome{color:#e9e6dc;font-size:14px}
+.customer-account-welcome strong{color:#fff}
+.customer-account-email{margin-top:4px;color:#b8b5aa;font-size:12px}
+.customer-account-hero-side{display:grid;justify-items:center;gap:9px;min-width:170px;text-align:center}
+.customer-avatar{display:grid;place-items:center;width:58px;height:58px;border:1px solid #b99c4d;border-radius:50%;background:#28261e;color:#e4c76f;font-family:Georgia,serif;font-size:25px}
+.customer-member-label{color:#e5cc7e;font-size:9px;font-weight:800;letter-spacing:.14em}
+.customer-member-caption{max-width:190px;color:#aaa79b;font-size:10px;line-height:1.5}
+.customer-hero-watermark{position:absolute;z-index:0;right:17%;bottom:-100px;color:rgba(255,255,255,.035);font-family:Georgia,serif;font-size:290px;line-height:1;pointer-events:none}
+.customer-feedback{margin:0 0 14px;padding:12px 15px;border-radius:9px;font-size:12px}
+.customer-feedback-success{border:1px solid #c9e4d0;background:#f0f8f2;color:#21643b}
+.customer-feedback-error{border:1px solid #f0c8c4;background:#fff3f1;color:#8b2720}
+.customer-account-layout{display:grid;grid-template-columns:220px minmax(0,1fr);align-items:start;gap:24px}
+.customer-account-sidebar{position:sticky;top:18px;display:grid;gap:15px}
+.customer-sidebar-title{padding:0 10px;color:#8b8064;font-size:9px;font-weight:800;letter-spacing:.16em}
+.customer-account-nav{display:grid;gap:5px;padding:8px;border:1px solid #eae6dc;border-radius:13px;background:#fff}
+.customer-account-nav a{display:grid;grid-template-columns:25px 1fr 14px;align-items:center;gap:8px;padding:12px 9px;border-radius:8px;color:#454238;font-size:11px;font-weight:700;transition:background .15s,color .15s}
+.customer-account-nav a:hover,.customer-account-nav a:focus-visible{outline:none;background:#f6f2e7;color:#6e571b}
+.customer-nav-number{color:#a9955f;font-size:9px;font-variant-numeric:tabular-nums}
+.customer-nav-arrow{color:#a9955f;text-align:right}
+.customer-sidebar-help{padding:17px 15px;border:1px solid #e8e1ce;border-radius:12px;background:#fbf9f3}
+.customer-help-icon{display:grid;place-items:center;width:25px;height:25px;margin-bottom:12px;border-radius:50%;background:#e9dfc3;color:#6f591e;font-family:Georgia,serif;font-weight:700}
+.customer-sidebar-help strong{display:block;margin-bottom:6px;font-size:12px}
+.customer-sidebar-help p{font-size:10px;line-height:1.6}
+.customer-sidebar-help a{display:inline-block;margin-top:12px;color:#765f20;font-size:10px;font-weight:800}
+.customer-account-content{min-width:0}
+.customer-account-section{scroll-margin-top:22px;margin:0 0 17px;padding:clamp(20px,3vw,30px);border:1px solid #e9e5dc;border-radius:15px;background:#fff;box-shadow:0 5px 18px rgba(32,29,20,.025)}
+.customer-section-topline{display:flex;justify-content:space-between;gap:12px;padding-bottom:13px;border-bottom:1px solid #f0eee8;color:#9b8a5b;font-size:8px;font-weight:800;letter-spacing:.13em}
+.customer-section-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:20px 0 22px}
+.customer-section-heading h2{margin:0 0 6px;color:#22211d;font-family:Georgia,serif;font-size:clamp(23px,3vw,29px);font-weight:400;letter-spacing:-.025em}
+.customer-section-heading p{font-size:11px;line-height:1.6}
+.customer-section-symbol{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border:1px solid #e9e1cc;border-radius:50%;color:#987b2d;font-size:20px}
+.customer-modern-form{display:grid;gap:15px;max-width:720px}
+.customer-modern-form label{display:grid;gap:7px;color:#49463d;font-size:10px;font-weight:800}
+.customer-modern-form input,.customer-modern-form textarea{width:100%;min-height:44px;border:1px solid #dedbd2;border-radius:7px;padding:11px 12px;background:#fff;color:#24231f;font:inherit;font-size:12px;transition:border-color .15s,box-shadow .15s}
+.customer-modern-form textarea{min-height:120px;resize:vertical;line-height:1.6}
+.customer-modern-form input:focus,.customer-modern-form textarea:focus{outline:none;border-color:#b89a4b;box-shadow:0 0 0 3px rgba(184,154,75,.13)}
+.customer-modern-form input:disabled{background:#f5f4f0;color:#777}
+.customer-modern-form label small{color:#8d897e;font-size:9px;font-weight:400}
+.customer-primary-button{display:inline-flex;align-items:center;justify-content:center;gap:18px;justify-self:start;min-height:43px;padding:0 17px;border:1px solid #171713;border-radius:7px;background:#171713;color:#f1d889;font-size:10px;font-weight:800;transition:background .15s,transform .15s}
+.customer-primary-button:hover:not(:disabled){transform:translateY(-1px);background:#302b1d}
+.customer-primary-button:disabled{opacity:.55;cursor:wait}
+.customer-modern-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.customer-optional{color:#999;font-weight:400}
+.customer-address-editor{max-width:none;margin-top:25px;padding-top:22px;border-top:1px solid #efede7}
+.customer-form-heading,.customer-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.customer-form-heading h3,.customer-history-heading h3{margin:0;color:#2a2924;font-family:Georgia,serif;font-size:17px;font-weight:400}
+.customer-form-heading>span,.customer-history-heading>span{color:#a28c50;font-size:8px;font-weight:800;letter-spacing:.12em}
+.customer-default-checkbox{display:flex!important;grid-template-columns:16px 1fr;align-items:center;gap:9px!important;font-weight:600!important}
+.customer-default-checkbox input{width:16px;height:16px;min-height:16px;accent-color:#88702e}
+.customer-address-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.customer-address-card{min-width:0;padding:15px;border:1px solid #e9e5dc;border-radius:10px;background:#fdfcf9}
+.customer-address-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}
+.customer-address-label{color:#766027;font-size:10px;font-weight:800}
+.customer-default-label{padding:4px 7px;border-radius:999px;background:#f1ead7;color:#80651e;font-size:7px;font-weight:800;letter-spacing:.1em}
+.customer-address-card>strong{display:block;margin-bottom:6px;font-size:12px}
+.customer-address-card p{margin-top:4px;font-size:10px;line-height:1.55;overflow-wrap:anywhere}
+.customer-remove-link{margin-top:11px;padding:4px 0;background:transparent;color:#8c4c3f;font-size:9px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.customer-remove-link:disabled{opacity:.5;cursor:wait}
+.customer-empty-state{display:grid;justify-items:center;gap:7px;padding:25px 15px;border:1px dashed #e2ddcf;border-radius:10px;background:#fdfcf9;text-align:center}
+.customer-empty-state>span{color:#a58c4b;font-family:Georgia,serif;font-size:27px}
+.customer-empty-state strong{font-size:12px}
+.customer-empty-state p{font-size:10px}
+.customer-empty-state a{margin-top:5px;color:#7b6323;font-size:10px;font-weight:800}
+.customer-wishlist-list,.customer-support-list{list-style:none;margin:0;padding:0}
+.customer-wishlist-list li,.customer-support-list li{display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #efede7}
+.customer-wishlist-list li:last-child,.customer-support-list li:last-child{border-bottom:0}
+.customer-wishlist-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:9px;background:#f5f1e6;color:#92742a;font-size:20px}
+.customer-wishlist-list li>div,.customer-support-list li>div{display:grid;flex:1;gap:4px;min-width:0}
+.customer-wishlist-list strong,.customer-support-list strong{font-size:11px;overflow-wrap:anywhere}
+.customer-wishlist-list small,.customer-support-list small{color:#89857a;font-size:9px;overflow-wrap:anywhere}
+.customer-wishlist-list .customer-remove-link{margin:0 0 0 auto}
+.customer-form-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.customer-form-bottom>small{color:#999;font-size:9px}
+.customer-history-heading{margin:27px 0 8px;padding-top:18px;border-top:1px solid #efede7}
+.customer-ticket-status{padding:5px 8px;border-radius:999px;background:#f4f1e8;color:#786127;font-size:8px;font-weight:800;text-transform:capitalize;white-space:nowrap}
+.customer-inline-empty{padding:13px 0;font-size:10px}
+.customer-integration-notice{display:flex;align-items:flex-start;gap:12px;padding:17px;border:1px solid #e9dfc5;border-radius:9px;background:#fcfaf4}
+.customer-integration-notice>span{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:#e9dfc5;color:#72591a;font-family:Georgia,serif;font-weight:700}
+.customer-integration-notice strong{display:block;margin:2px 0 5px;font-size:11px}
+.customer-integration-notice p{font-size:10px;line-height:1.6}
+.customer-secondary-link{display:inline-flex;gap:15px;margin-top:17px;color:#71591c;font-size:10px;font-weight:800}
+.customer-account-footer{display:flex;justify-content:space-between;gap:12px;margin-top:27px;padding:17px 2px;border-top:1px solid #e9e5db;color:#9a9588;font-size:8px;font-weight:800;letter-spacing:.12em}
+.customer-account-footer a:first-child{color:#71602f}
+.customer-loading{min-height:65vh;display:grid;align-content:center;justify-items:center;gap:13px;color:#8a7a4c}
+.customer-loading-mark{display:grid;place-items:center;width:54px;height:54px;border:1px solid #c9a85a;border-radius:50%;font-family:Georgia,serif;font-size:22px}
+.customer-loading p{font-size:11px}
+@media(max-width:850px){.customer-account-layout{grid-template-columns:1fr}.customer-account-sidebar{position:static}.customer-account-nav{display:flex;overflow-x:auto}.customer-account-nav a{flex:0 0 auto;min-width:116px;grid-template-columns:20px 1fr 10px}.customer-sidebar-help{display:none}.customer-account-hero{min-height:190px}}
+@media(max-width:560px){.customer-account-shell{padding:15px 13px 22px}.customer-account-header{padding-bottom:14px}.customer-account-header-actions{gap:9px}.customer-continue-link{font-size:10px}.customer-account-header .signout-button{padding:8px 9px;font-size:9px}.customer-account-brand img{width:132px}.customer-account-hero{align-items:flex-start;margin:17px 0;padding:25px 20px;min-height:0}.customer-account-hero-side{min-width:0}.customer-avatar{width:44px;height:44px;font-size:20px}.customer-member-caption{display:none}.customer-member-label{font-size:7px}.customer-account-hero h1{font-size:34px}.customer-account-welcome{font-size:11px}.customer-account-email{font-size:10px}.customer-hero-watermark{right:2%;bottom:-55px;font-size:180px}.customer-account-nav{padding:6px}.customer-account-nav a{min-width:98px;padding:10px 7px;font-size:10px}.customer-nav-number{display:none}.customer-account-section{padding:17px 14px;margin-bottom:12px}.customer-section-topline{font-size:7px}.customer-section-heading{margin:16px 0}.customer-section-heading h2{font-size:23px}.customer-section-heading p{font-size:10px}.customer-modern-grid,.customer-address-grid{grid-template-columns:1fr}.customer-form-bottom{align-items:stretch;flex-direction:column}.customer-form-bottom .customer-primary-button{width:100%}.customer-account-footer{font-size:7px;letter-spacing:.06em}}
+@media(prefers-reduced-motion:reduce){.customer-account-shell *{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Customer account navigation: active state, sticky mobile rail and reliable section jumps */
+.customer-account-nav a.is-active,
+.customer-account-nav a[aria-current="location"] {
+  background: #211d12;
+  color: #f0d889;
+  box-shadow: inset 0 0 0 1px rgba(201,162,39,.28);
+}
+.customer-account-nav a.is-active .customer-nav-number,
+.customer-account-nav a.is-active .customer-nav-arrow {
+  color: #e3c46b;
+}
+.customer-account-nav a:focus-visible,
+.customer-sidebar-help a:focus-visible,
+.customer-account-footer a:focus-visible {
+  outline: 2px solid #c9a227;
+  outline-offset: 3px;
+}
+.customer-account-section {
+  scroll-margin-top: 92px;
+}
+@media (max-width: 850px) {
+  .customer-account-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 8px 0;
+    background: rgba(24, 24, 22, .96);
+    backdrop-filter: blur(12px);
+  }
+  .customer-sidebar-title {
+    padding: 3px 8px 8px;
+  }
+  .customer-account-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  .customer-account-nav a {
+    flex: 0 0 auto;
+    min-width: 104px;
+    scroll-snap-align: start;
+  }
+  .customer-account-section {
+    scroll-margin-top: 112px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .customer-account-content {
+    scroll-behavior: smooth;
+  }
+}
