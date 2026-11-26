@@ -6,7 +6,7 @@ const items = [
   { href: '/customer/wishlist', label: 'Wishlist', mark: '♡' },
   { href: '/customer/orders', label: 'Orders', mark: '▤' },
   { href: '/customer/account', label: 'Account', mark: '○' },
-];
+] as const;
 
 export default function CustomerBottomNav({ active = 'Home' }: { active?: string }) {
   return (
