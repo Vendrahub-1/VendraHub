@@ -11,6 +11,16 @@ type Ticket = { id: string; subject: string; status: string; created_at: string 
 type WishlistItem = { id: string; shopify_product_gid: string; created_at: string };
 type Address = { id: string; label: string; recipient_name: string; phone: string; address_line1: string; address_line2: string | null; city: string; state_region: string | null; postal_code: string | null; country: string; is_default: boolean };
 
+const emptyAddress = { label: 'Home', recipient_name: '', phone: '', address_line1: '', address_line2: '', city: '', state_region: '', postal_code: '', country: 'Nigeria', is_default: true };
+
+const navigation = [
+  { id: 'profile', label: 'Personal details', short: 'Profile', mark: '01' },
+  { id: 'addresses', label: 'Delivery addresses', short: 'Addresses', mark: '02' },
+  { id: 'wishlist', label: 'Wishlist', short: 'Wishlist', mark: '03' },
+  { id: 'support', label: 'Customer support', short: 'Support', mark: '04' },
+  { id: 'orders', label: 'Order history', short: 'Orders', mark: '05' },
+];
+
 export default function CustomerAccountPage() {
   const [email, setEmail] = useState('');
   const [profile, setProfile] = useState<Profile>({ full_name: '' });
@@ -23,24 +33,36 @@ export default function CustomerAccountPage() {
   const [error, setError] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [addressForm, setAddressForm] = useState({ label: 'Home', recipient_name: '', phone: '', address_line1: '', address_line2: '', city: '', state_region: '', postal_code: '', country: 'Nigeria', is_default: true });
+  const [addressForm, setAddressForm] = useState(emptyAddress);
 
   async function load() {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.location.assign('/customer/login'); return; }
-    setEmail(user.email ?? '');
-    const [p, t, w, a] = await Promise.all([
-      supabase.from('profiles').select('full_name,avatar_url').eq('id', user.id).maybeSingle(),
-      fetch('/api/customer/support', { cache: 'no-store' }),
-      fetch('/api/customer/wishlist', { cache: 'no-store' }),
-      fetch('/api/customer/addresses', { cache: 'no-store' }),
-    ]);
-    if (p.data) setProfile(p.data);
-    if (t.ok) { const v = await t.json(); setTickets(v.tickets ?? []); }
-    if (w.ok) { const v = await w.json(); setWishlist(v.items ?? []); }
-    if (a.ok) { const v = await a.json(); setAddresses(v.addresses ?? []); }
-    setLoading(false);
+    setError('');
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user) { window.location.assign('/customer/login'); return; }
+      setEmail(user.email ?? '');
+      const [p, t, w, a] = await Promise.all([
+        supabase.from('profiles').select('full_name,avatar_url').eq('id', user.id).maybeSingle(),
+        fetch('/api/customer/support', { cache: 'no-store' }),
+        fetch('/api/customer/wishlist', { cache: 'no-store' }),
+        fetch('/api/customer/addresses', { cache: 'no-store' }),
+      ]);
+      if (p.error) throw new Error('We could not load your profile details.');
+      if (p.data) setProfile(p.data);
+      const [ticketData, wishlistData, addressData] = await Promise.all([t.json(), w.json(), a.json()]);
+      if (!t.ok) throw new Error(ticketData.error || 'We could not load your support history.');
+      if (!w.ok) throw new Error(wishlistData.error || 'We could not load your wishlist.');
+      if (!a.ok) throw new Error(addressData.error || 'We could not load your delivery addresses.');
+      setTickets(ticketData.tickets ?? []);
+      setWishlist(wishlistData.items ?? []);
+      setAddresses(addressData.addresses ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'We could not load your account. Please refresh and try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { void load(); }, []);
@@ -51,7 +73,7 @@ export default function CustomerAccountPage() {
       const response = await fetch('/api/customer/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: profile.full_name }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Could not update profile.');
-      setProfile(data.profile); setNotice('Profile updated.');
+      setProfile(data.profile); setNotice('Your profile has been updated.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not update profile.'); }
     finally { setBusy(false); }
   }
@@ -74,35 +96,158 @@ export default function CustomerAccountPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Could not save address.');
       setAddresses(current => [data.address, ...current.filter(x => !data.address.is_default || !x.is_default)]);
-      setAddressForm({ label: 'Home', recipient_name: '', phone: '', address_line1: '', address_line2: '', city: '', state_region: '', postal_code: '', country: 'Nigeria', is_default: false });
-      setNotice('Delivery address saved.');
+      setAddressForm({ ...emptyAddress, is_default: false });
+      setNotice('Your delivery address has been saved.');
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not save address.'); }
     finally { setBusy(false); }
   }
 
   async function removeAddress(id: string) {
-    const response = await fetch('/api/customer/addresses?id=' + encodeURIComponent(id), { method: 'DELETE' });
-    if (!response.ok) { setError('Could not remove address.'); return; }
-    setAddresses(current => current.filter(x => x.id !== id)); setNotice('Address removed.');
+    if (!window.confirm('Remove this delivery address?')) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch('/api/customer/addresses?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not remove address.');
+      setAddresses(current => current.filter(x => x.id !== id)); setNotice('Delivery address removed.');
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not remove address.'); }
+    finally { setBusy(false); }
   }
 
   async function removeWishlist(gid: string) {
-    const response = await fetch('/api/customer/wishlist?product=' + encodeURIComponent(gid), { method: 'DELETE' });
-    if (!response.ok) { setError('Could not remove wishlist item.'); return; }
-    setWishlist(current => current.filter(x => x.shopify_product_gid !== gid)); setNotice('Wishlist item removed.');
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch('/api/customer/wishlist?product=' + encodeURIComponent(gid), { method: 'DELETE' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not remove wishlist item.');
+      setWishlist(current => current.filter(x => x.shopify_product_gid !== gid)); setNotice('Wishlist item removed.');
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not remove wishlist item.'); }
+    finally { setBusy(false); }
   }
 
-  if (loading) return <main className="session-page"><p>Loading your account…</p></main>;
+  if (loading) return <main className="customer-loading"><div className="customer-loading-mark">VH</div><p>Preparing your VendraHub account…</p></main>;
 
-  return <main className="session-page customer-theme customer-portal">
-    <header className="account-header"><Link href="/customer" className="account-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub — Shop Smart. Live Stylish." width={220} height={64} priority /></Link><div className="account-header-actions"><Link href="/customer">Continue shopping</Link><SignOutButton /></div></header>
-    <section className="hero-panel intro-panel"><div><p className="eyebrow">VENDRAHUB CUSTOMER ACCOUNT</p><h1>Welcome{profile.full_name ? `, ${profile.full_name}` : ''}</h1><p>{email}</p></div><span className="session-pill">Customer</span></section>
-    {notice && <p className="customer-notice" role="status">{notice}</p>}{error && <p className="auth-error" role="alert">{error}</p>}
-    <nav className="customer-nav"><a href="#profile">Profile</a><a href="#addresses">Delivery addresses</a><a href="#wishlist">Wishlist</a><a href="#support">Support</a><a href="#orders">Orders</a></nav>
-    <section id="profile" className="customer-section"><div className="section-heading"><h2>Personal details</h2><p>Keep your contact details up to date.</p></div><form className="customer-form" onSubmit={saveProfile}><label>Full name<input value={profile.full_name ?? ''} maxLength={120} onChange={e=>setProfile({ ...profile, full_name: e.target.value })} required /></label><label>Email address<input value={email} disabled /></label><button disabled={busy}>Save profile</button></form></section>
-    <section id="addresses" className="customer-section"><div className="section-heading"><h2>Delivery addresses</h2><p>Manage where your orders should be delivered.</p></div><div className="customer-card-grid">{addresses.map(a=><article className="customer-data-card" key={a.id}><div className="customer-card-title"><strong>{a.label}</strong>{a.is_default && <span className="state">Default</span>}</div><p>{a.recipient_name} · {a.phone}</p><p>{a.address_line1}{a.address_line2 ? ', ' + a.address_line2 : ''}, {a.city}{a.state_region ? ', ' + a.state_region : ''}, {a.country} {a.postal_code ?? ''}</p><button type="button" className="text-button" onClick={()=>removeAddress(a.id)}>Remove</button></article>)}</div><form className="customer-form customer-address-form" onSubmit={addAddress}><h3>Add an address</h3><div className="customer-form-grid"><label>Label<input value={addressForm.label} onChange={e=>setAddressForm({...addressForm,label:e.target.value})} required /></label><label>Recipient name<input value={addressForm.recipient_name} onChange={e=>setAddressForm({...addressForm,recipient_name:e.target.value})} required /></label><label>Phone<input type="tel" value={addressForm.phone} onChange={e=>setAddressForm({...addressForm,phone:e.target.value})} required /></label><label>Address line 1<input value={addressForm.address_line1} onChange={e=>setAddressForm({...addressForm,address_line1:e.target.value})} required /></label><label>Address line 2<input value={addressForm.address_line2} onChange={e=>setAddressForm({...addressForm,address_line2:e.target.value})} /></label><label>City<input value={addressForm.city} onChange={e=>setAddressForm({...addressForm,city:e.target.value})} required /></label><label>State / region<input value={addressForm.state_region} onChange={e=>setAddressForm({...addressForm,state_region:e.target.value})} /></label><label>Postal code<input value={addressForm.postal_code} onChange={e=>setAddressForm({...addressForm,postal_code:e.target.value})} /></label><label>Country<input value={addressForm.country} onChange={e=>setAddressForm({...addressForm,country:e.target.value})} required /></label></div><label className="customer-check"><input type="checkbox" checked={addressForm.is_default} onChange={e=>setAddressForm({...addressForm,is_default:e.target.checked})} /> Set as default delivery address</label><button disabled={busy}>Save address</button></form></section>
-    <section id="wishlist" className="customer-section"><div className="section-heading"><h2>Wishlist</h2><p>Products you have saved for later.</p></div>{wishlist.length ? <ul className="customer-list">{wishlist.map(item=><li key={item.id}><span>{item.shopify_product_gid}</span><button type="button" className="text-button" onClick={()=>removeWishlist(item.shopify_product_gid)}>Remove</button></li>)}</ul> : <p className="customer-empty">Your wishlist is empty.</p>}</section>
-    <section id="support" className="customer-section"><div className="section-heading"><h2>Customer support</h2><p>Send a message to the VendraHub support team.</p></div><form className="customer-form" onSubmit={submitTicket}><label>Subject<input value={subject} minLength={3} maxLength={160} onChange={e=>setSubject(e.target.value)} required /></label><label>Message<textarea value={message} minLength={10} maxLength={5000} rows={5} onChange={e=>setMessage(e.target.value)} required /></label><button disabled={busy}>Submit support request</button></form><h3 className="customer-subheading">Your support history</h3>{tickets.length ? <ul className="customer-list">{tickets.map(t=><li key={t.id}><div><strong>{t.subject}</strong><small>{t.status.replaceAll('_',' ')} · {new Date(t.created_at).toLocaleDateString()}</small></div></li>)}</ul> : <p className="customer-empty">No support requests yet.</p>}</section>
-    <section id="orders" className="customer-section"><div className="section-heading"><h2>Order history</h2><p>Order tracking will appear here after the Shopify customer/order integration is authorised.</p></div><p className="customer-empty">Shopify order access is not connected yet. No order data is being simulated.</p></section>
-  </main>;
+  return (
+    <main className="customer-account-shell">
+      <header className="customer-account-header">
+        <Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop">
+          <Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority />
+        </Link>
+        <div className="customer-account-header-actions">
+          <Link href="/customer" className="customer-continue-link"><span aria-hidden="true">←</span> Continue shopping</Link>
+          <SignOutButton />
+        </div>
+      </header>
+
+      <section className="customer-account-hero">
+        <div className="customer-account-hero-copy">
+          <p className="customer-overline">YOUR VENDRAHUB SPACE</p>
+          <h1>Good to see you<span>.</span></h1>
+          <p className="customer-account-welcome">Welcome back, <strong>{profile.full_name || 'VendraHub customer'}</strong></p>
+          <p className="customer-account-email">{email}</p>
+        </div>
+        <div className="customer-account-hero-side">
+          <div className="customer-avatar" aria-hidden="true">{(profile.full_name || 'V').trim().charAt(0).toUpperCase()}</div>
+          <span className="customer-member-label">CUSTOMER ACCOUNT</span>
+          <span className="customer-member-caption">Your details, orders and saved items</span>
+        </div>
+        <div className="customer-hero-watermark" aria-hidden="true">VH</div>
+      </section>
+
+      {notice && <p className="customer-feedback customer-feedback-success" role="status">{notice}</p>}
+      {error && <p className="customer-feedback customer-feedback-error" role="alert">{error}</p>}
+
+      <div className="customer-account-layout">
+        <aside className="customer-account-sidebar">
+          <p className="customer-sidebar-title">ACCOUNT MENU</p>
+          <nav className="customer-account-nav" aria-label="Customer account sections">
+            {navigation.map(item => (
+              <a href={'#' + item.id} key={item.id}>
+                <span className="customer-nav-number">{item.mark}</span>
+                <span>{item.short}</span>
+                <span className="customer-nav-arrow" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </nav>
+          <div className="customer-sidebar-help">
+            <span className="customer-help-icon" aria-hidden="true">?</span>
+            <strong>Need a hand?</strong>
+            <p>Our support team is here to help with your VendraHub experience.</p>
+            <a href="#support">Contact support <span aria-hidden="true">→</span></a>
+          </div>
+        </aside>
+
+        <div className="customer-account-content">
+          <section id="profile" className="customer-account-section">
+            <div className="customer-section-topline"><span>01 / ACCOUNT</span><span>PERSONAL INFORMATION</span></div>
+            <div className="customer-section-heading"><div><h2>Personal details</h2><p>Keep your contact information accurate and up to date.</p></div><span className="customer-section-symbol" aria-hidden="true">✳</span></div>
+            <form className="customer-modern-form" onSubmit={saveProfile}>
+              <label>Full name<input value={profile.full_name ?? ''} maxLength={120} onChange={e => setProfile({ ...profile, full_name: e.target.value })} required autoComplete="name" /></label>
+              <label>Email address<input value={email} disabled autoComplete="email" /><small>Your sign-in email is managed by your account security settings.</small></label>
+              <button className="customer-primary-button" disabled={busy}>{busy ? 'Saving…' : 'Save profile'} <span aria-hidden="true">→</span></button>
+            </form>
+          </section>
+
+          <section id="addresses" className="customer-account-section">
+            <div className="customer-section-topline"><span>02 / DELIVERY</span><span>WHERE WE SEND YOUR ORDERS</span></div>
+            <div className="customer-section-heading"><div><h2>Delivery addresses</h2><p>Manage the places where your orders should be delivered.</p></div><span className="customer-section-symbol" aria-hidden="true">⌖</span></div>
+            {addresses.length > 0 ? <div className="customer-address-grid">{addresses.map(address => (
+              <article className="customer-address-card" key={address.id}>
+                <div className="customer-address-card-top"><span className="customer-address-label">{address.label}</span>{address.is_default && <span className="customer-default-label">DEFAULT</span>}</div>
+                <strong>{address.recipient_name}</strong><p>{address.phone}</p>
+                <p>{address.address_line1}{address.address_line2 ? ', ' + address.address_line2 : ''}</p>
+                <p>{address.city}{address.state_region ? ', ' + address.state_region : ''}{address.postal_code ? ' ' + address.postal_code : ''}</p>
+                <p>{address.country}</p>
+                <button type="button" className="customer-remove-link" onClick={() => removeAddress(address.id)} disabled={busy}>Remove address</button>
+              </article>
+            ))}</div> : <div className="customer-empty-state"><span aria-hidden="true">⌖</span><strong>No delivery addresses yet</strong><p>Add an address below to make your next checkout easier.</p></div>}
+            <form className="customer-modern-form customer-address-editor" onSubmit={addAddress}>
+              <div className="customer-form-heading"><h3>Add a delivery address</h3><span>NEW ADDRESS</span></div>
+              <div className="customer-modern-grid">
+                <label>Label<input value={addressForm.label} onChange={e => setAddressForm({ ...addressForm, label: e.target.value })} required placeholder="Home, Work…" /></label>
+                <label>Recipient name<input value={addressForm.recipient_name} onChange={e => setAddressForm({ ...addressForm, recipient_name: e.target.value })} required autoComplete="name" /></label>
+                <label>Phone number<input type="tel" value={addressForm.phone} onChange={e => setAddressForm({ ...addressForm, phone: e.target.value })} required autoComplete="tel" /></label>
+                <label>Address line 1<input value={addressForm.address_line1} onChange={e => setAddressForm({ ...addressForm, address_line1: e.target.value })} required autoComplete="address-line1" /></label>
+                <label>Address line 2 <span className="customer-optional">(optional)</span><input value={addressForm.address_line2} onChange={e => setAddressForm({ ...addressForm, address_line2: e.target.value })} autoComplete="address-line2" /></label>
+                <label>City<input value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} required autoComplete="address-level2" /></label>
+                <label>State / region<input value={addressForm.state_region} onChange={e => setAddressForm({ ...addressForm, state_region: e.target.value })} autoComplete="address-level1" /></label>
+                <label>Postal code <span className="customer-optional">(optional)</span><input value={addressForm.postal_code} onChange={e => setAddressForm({ ...addressForm, postal_code: e.target.value })} autoComplete="postal-code" /></label>
+                <label>Country<input value={addressForm.country} onChange={e => setAddressForm({ ...addressForm, country: e.target.value })} required autoComplete="country-name" /></label>
+              </div>
+              <label className="customer-default-checkbox"><input type="checkbox" checked={addressForm.is_default} onChange={e => setAddressForm({ ...addressForm, is_default: e.target.checked })} /> Set as my default delivery address</label>
+              <button className="customer-primary-button" disabled={busy}>{busy ? 'Saving…' : 'Save address'} <span aria-hidden="true">→</span></button>
+            </form>
+          </section>
+
+          <section id="wishlist" className="customer-account-section">
+            <div className="customer-section-topline"><span>03 / SAVED ITEMS</span><span>YOUR SHORTLIST</span></div>
+            <div className="customer-section-heading"><div><h2>Your wishlist</h2><p>Keep the products you love close at hand.</p></div><span className="customer-section-symbol" aria-hidden="true">♡</span></div>
+            {wishlist.length ? <ul className="customer-wishlist-list">{wishlist.map(item => (
+              <li key={item.id}><span className="customer-wishlist-icon" aria-hidden="true">♡</span><div><strong>Saved Shopify product</strong><small>Product reference: {item.shopify_product_gid.split('/').pop()}</small><small>Saved {new Date(item.created_at).toLocaleDateString()}</small></div><button type="button" className="customer-remove-link" onClick={() => removeWishlist(item.shopify_product_gid)} disabled={busy}>Remove</button></li>
+            ))}</ul> : <div className="customer-empty-state"><span aria-hidden="true">♡</span><strong>Your wishlist is waiting</strong><p>Save products while shopping and they will appear here.</p><Link href="/customer">Explore the collection <span aria-hidden="true">→</span></Link></div>}
+          </section>
+
+          <section id="support" className="customer-account-section">
+            <div className="customer-section-topline"><span>04 / WE ARE HERE</span><span>CUSTOMER CARE</span></div>
+            <div className="customer-section-heading"><div><h2>Customer support</h2><p>Send a message to the VendraHub support team. We’ll keep your requests here.</p></div><span className="customer-section-symbol" aria-hidden="true">✉</span></div>
+            <form className="customer-modern-form" onSubmit={submitTicket}>
+              <label>Subject<input value={subject} minLength={3} maxLength={160} onChange={e => setSubject(e.target.value)} required placeholder="What can we help you with?" /></label>
+              <label>Message<textarea value={message} minLength={10} maxLength={5000} rows={5} onChange={e => setMessage(e.target.value)} required placeholder="Tell us a little more about your question…" /></label>
+              <div className="customer-form-bottom"><small>{message.length}/5000 characters</small><button className="customer-primary-button" disabled={busy}>{busy ? 'Submitting…' : 'Submit support request'} <span aria-hidden="true">→</span></button></div>
+            </form>
+            <div className="customer-history-heading"><h3>Your support history</h3><span>{tickets.length} {tickets.length === 1 ? 'REQUEST' : 'REQUESTS'}</span></div>
+            {tickets.length ? <ul className="customer-support-list">{tickets.map(ticket => <li key={ticket.id}><div><strong>{ticket.subject}</strong><small>Submitted {new Date(ticket.created_at).toLocaleDateString()}</small></div><span className="customer-ticket-status">{ticket.status.replaceAll('_', ' ')}</span></li>)}</ul> : <p className="customer-inline-empty">No support requests yet.</p>}
+          </section>
+
+          <section id="orders" className="customer-account-section">
+            <div className="customer-section-topline"><span>05 / YOUR PURCHASES</span><span>ORDER TRACKING</span></div>
+            <div className="customer-section-heading"><div><h2>Order history</h2><p>Your purchases and delivery updates will live here.</p></div><span className="customer-section-symbol" aria-hidden="true">▤</span></div>
+            <div className="customer-integration-notice"><span aria-hidden="true">i</span><div><strong>Shopify order access is not connected yet</strong><p>Order history will appear after the Shopify customer and order integration is authorised. No order data is being simulated.</p></div></div>
+            <Link href="/customer" className="customer-secondary-link">Continue shopping <span aria-hidden="true">→</span></Link>
+          </section>
+        </div>
+      </div>
+      <footer className="customer-account-footer"><Link href="/customer">VENDRAHUB</Link><span>SHOP SMART. LIVE STYLISH.</span><a href="#profile">Back to top ↑</a></footer>
+    </main>
+  );
 }
