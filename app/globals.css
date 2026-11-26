@@ -850,3 +850,18 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 .vh-customer-sidebar{overflow-y:auto}
 .vh-customer-sidebar nav{padding-bottom:12px}
 @media(max-width:650px){.vh-home-header-actions{gap:7px}.vh-home-notification-trigger{width:42px;min-height:42px;justify-content:center;padding:0}.vh-home-notification-trigger span:last-child{display:none}}
+
+
+/* Clean customer secondary sidebar: one continuous list, no section headings. */
+.vh-customer-sidebar nav{display:grid;gap:3px;margin-top:14px;padding:0 0 12px}
+.vh-customer-sidebar nav a{display:grid;grid-template-columns:22px minmax(0,1fr) 14px;align-items:center;gap:12px;min-height:48px;padding:11px 10px;border:1px solid transparent;border-bottom-color:rgba(255,255,255,.08);border-radius:9px;color:#f3eee3;text-decoration:none;font-size:13px;line-height:1.35;transition:background .18s,border-color .18s,color .18s}
+.vh-customer-sidebar nav a:hover,.vh-customer-sidebar nav a:focus-visible,.vh-customer-sidebar nav a.is-active{border-color:rgba(212,182,109,.28);background:rgba(212,182,109,.1);color:#e7cb7e;outline:none}
+.vh-customer-sidebar-icon{display:grid;place-items:center;width:22px;color:#d4b66d;font-size:17px}
+.vh-customer-sidebar-arrow{justify-self:end;color:#9e8b5b;font-size:20px;line-height:1}
+.vh-customer-sidebar-auth{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:48px;margin:14px 0 4px;padding:12px 14px;border:1px solid #9d7b36;border-radius:999px;background:rgba(212,182,109,.08);color:#e2c47a;text-align:center;text-decoration:none;font-size:13px;font-weight:750;cursor:pointer}
+.vh-customer-sidebar-auth:hover,.vh-customer-sidebar-auth:focus-visible{background:rgba(212,182,109,.17);outline:2px solid #c9a227;outline-offset:3px}
+.vh-customer-sidebar-auth:disabled{opacity:.6;cursor:wait}
+.vh-customer-sidebar-auth-placeholder{height:48px;margin-top:14px}
+.vh-customer-sidebar-error{margin:8px 2px;color:#f0a49a;font-size:11px;line-height:1.5}
+.vh-customer-sidebar-head button:focus-visible,.vh-customer-menu-trigger:focus-visible,.vh-customer-menu-backdrop:focus-visible{outline:2px solid #c9a227;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.vh-customer-sidebar,.vh-customer-sidebar *{transition:none!important}}
