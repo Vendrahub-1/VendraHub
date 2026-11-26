@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
+import CustomerSidebar from '@/components/storefront/customer-sidebar';
 
 type WishlistItem = { id: string; shopify_product_gid: string; created_at: string };
 
@@ -43,7 +44,7 @@ export default function CustomerWishlistPage() {
     <main className="vh-store vh-wishlist-page">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        
+        <CustomerSidebar />
       </header>
       <section className="vh-wishlist-hero"><p className="vh-overline">YOUR SAVED COLLECTION</p><h1>Things you<br/><em>love.</em></h1><p>Save products you like and come back whenever you are ready. Your wishlist stays separate from your shopping orders.</p></section>
       {error && <p className="vh-wishlist-feedback" role="alert">{error} <Link href="/customer/login">Sign in</Link></p>}
