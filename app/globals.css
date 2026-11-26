@@ -825,3 +825,14 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 .customer-guest-actions .customer-primary-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .customer-guest-register{padding:13px 20px;border:1px solid rgba(220,190,120,.55);border-radius:999px;color:#e3c77e;text-decoration:none;font-weight:700}
 @media(max-width:650px){.vh-store-header{min-height:72px;align-items:center;flex-direction:row;justify-content:space-between;gap:12px;padding:10px 0}.vh-store-header nav{display:none}}
+
+
+/* Customer secondary navigation and Home support shortcuts. */
+.vh-customer-sidebar-label{margin:22px 0 2px;color:#c7aa65;font-size:9px;font-weight:800;letter-spacing:.18em}
+.vh-customer-help-hub{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin:36px 0;padding:clamp(22px,4vw,38px);border:1px solid rgba(184,153,83,.28);border-radius:16px;background:#171510;color:#f5f0e5}
+.vh-customer-help-hub h2{margin:7px 0 10px;font-family:Georgia,serif;font-size:clamp(25px,4vw,38px);font-weight:400}
+.vh-customer-help-hub p:not(.vh-overline){max-width:420px;color:#c3bcae;font-size:12px;line-height:1.7}
+.vh-customer-help-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vh-customer-help-links a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:9px;color:#f5f0e5;text-decoration:none;font-size:11px}
+.vh-customer-help-links a:hover{border-color:#c9a95e;color:#e6c978}
+@media(max-width:700px){.vh-customer-help-hub{grid-template-columns:1fr;gap:18px;margin:24px 0}.vh-customer-help-links{grid-template-columns:1fr}}
