@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import SignOutButton from '@/components/sign-out-button';
+import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 
 type Profile = { full_name: string | null; avatar_url?: string | null };
 type Ticket = { id: string; subject: string; status: string; created_at: string };
@@ -272,6 +273,7 @@ export default function CustomerAccountPage() {
         </div>
       </div>
       <footer className="customer-account-footer"><Link href="/customer">VENDRAHUB</Link><span>SHOP SMART. LIVE STYLISH.</span><a href="#profile">Back to top ↑</a></footer>
+      <CustomerBottomNav active="Account" />
     </main>
   );
 }
