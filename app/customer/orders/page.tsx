@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
+import CustomerSidebar from '@/components/storefront/customer-sidebar';
 
 const statuses = ['All orders', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returns & refunds'];
 const orderAreas = [
@@ -17,7 +18,7 @@ export default function CustomerOrdersPage() {
     <main className="vh-store vh-orders-page">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        
+        <CustomerSidebar />
       </header>
       <section className="vh-orders-hero"><p className="vh-overline">YOUR PURCHASES</p><h1>Every order,<br/><em>in one place.</em></h1><p>Review purchases, follow delivery progress, manage eligible cancellations and request returns or refunds.</p></section>
       <section aria-label="Order status filters" className="vh-order-status-list">{statuses.map(status => <span key={status}>{status}</span>)}</section>
