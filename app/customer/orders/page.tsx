@@ -17,7 +17,7 @@ export default function CustomerOrdersPage() {
     <main className="vh-store vh-orders-page">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <nav aria-label="Store navigation"><Link href="/customer/categories">Continue shopping</Link><Link href="/customer/account">My account</Link></nav>
+        
       </header>
       <section className="vh-orders-hero"><p className="vh-overline">YOUR PURCHASES</p><h1>Every order,<br/><em>in one place.</em></h1><p>Review purchases, follow delivery progress, manage eligible cancellations and request returns or refunds.</p></section>
       <section aria-label="Order status filters" className="vh-order-status-list">{statuses.map(status => <span key={status}>{status}</span>)}</section>
