@@ -17,9 +17,7 @@ const emptyAddress = { label: 'Home', recipient_name: '', phone: '', address_lin
 const navigation = [
   { id: 'profile', label: 'Personal details', short: 'Profile', mark: '01' },
   { id: 'addresses', label: 'Delivery addresses', short: 'Addresses', mark: '02' },
-  { id: 'wishlist', label: 'Wishlist', short: 'Wishlist', mark: '03' },
   { id: 'support', label: 'Customer support', short: 'Support', mark: '04' },
-  { id: 'orders', label: 'Order history', short: 'Orders', mark: '05' },
 ];
 
 export default function CustomerAccountPage() {
@@ -177,30 +175,7 @@ export default function CustomerAccountPage() {
       {error && <p className="customer-feedback customer-feedback-error" role="alert">{error}</p>}
 
       <div className="customer-account-layout">
-        <aside className="customer-account-sidebar">
-          <p className="customer-sidebar-title">ACCOUNT MENU</p>
-          <nav className="customer-account-nav" aria-label="Customer account sections">
-            {navigation.map(item => (
-              <a
-                href={'#' + item.id}
-                key={item.id}
-                className={activeSection === item.id ? 'is-active' : undefined}
-                aria-current={activeSection === item.id ? 'location' : undefined}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <span className="customer-nav-number">{item.mark}</span>
-                <span>{item.short}</span>
-                <span className="customer-nav-arrow" aria-hidden="true">↗</span>
-              </a>
-            ))}
-          </nav>
-          <div className="customer-sidebar-help">
-            <span className="customer-help-icon" aria-hidden="true">?</span>
-            <strong>Need a hand?</strong>
-            <p>Our support team is here to help with your VendraHub experience.</p>
-            <a href="#support">Contact support <span aria-hidden="true">→</span></a>
-          </div>
-        </aside>
+
 
         <div className="customer-account-content">
           <section id="profile" className="customer-account-section">
@@ -244,13 +219,7 @@ export default function CustomerAccountPage() {
             </form>
           </section>
 
-          <section id="wishlist" className="customer-account-section">
-            <div className="customer-section-topline"><span>03 / SAVED ITEMS</span><span>YOUR SHORTLIST</span></div>
-            <div className="customer-section-heading"><div><h2>Your wishlist</h2><p>Keep the products you love close at hand.</p></div><span className="customer-section-symbol" aria-hidden="true">♡</span></div>
-            {wishlist.length ? <ul className="customer-wishlist-list">{wishlist.map(item => (
-              <li key={item.id}><span className="customer-wishlist-icon" aria-hidden="true">♡</span><div><strong>Saved Shopify product</strong><small>Product reference: {item.shopify_product_gid.split('/').pop()}</small><small>Saved {new Date(item.created_at).toLocaleDateString()}</small></div><button type="button" className="customer-remove-link" onClick={() => removeWishlist(item.shopify_product_gid)} disabled={busy}>Remove</button></li>
-            ))}</ul> : <div className="customer-empty-state"><span aria-hidden="true">♡</span><strong>Your wishlist is waiting</strong><p>Save products while shopping and they will appear here.</p><Link href="/customer">Explore the collection <span aria-hidden="true">→</span></Link></div>}
-          </section>
+
 
           <section id="support" className="customer-account-section">
             <div className="customer-section-topline"><span>04 / WE ARE HERE</span><span>CUSTOMER CARE</span></div>
@@ -264,12 +233,7 @@ export default function CustomerAccountPage() {
             {tickets.length ? <ul className="customer-support-list">{tickets.map(ticket => <li key={ticket.id}><div><strong>{ticket.subject}</strong><small>Submitted {new Date(ticket.created_at).toLocaleDateString()}</small></div><span className="customer-ticket-status">{ticket.status.replaceAll('_', ' ')}</span></li>)}</ul> : <p className="customer-inline-empty">No support requests yet.</p>}
           </section>
 
-          <section id="orders" className="customer-account-section">
-            <div className="customer-section-topline"><span>05 / YOUR PURCHASES</span><span>ORDER TRACKING</span></div>
-            <div className="customer-section-heading"><div><h2>Order history</h2><p>Your purchases and delivery updates will live here.</p></div><span className="customer-section-symbol" aria-hidden="true">▤</span></div>
-            <div className="customer-integration-notice"><span aria-hidden="true">i</span><div><strong>Shopify order access is not connected yet</strong><p>Order history will appear after the Shopify customer and order integration is authorised. No order data is being simulated.</p></div></div>
-            <Link href="/customer" className="customer-secondary-link">Continue shopping <span aria-hidden="true">→</span></Link>
-          </section>
+
         </div>
       </div>
       <footer className="customer-account-footer"><Link href="/customer">VENDRAHUB</Link><span>SHOP SMART. LIVE STYLISH.</span><a href="#profile">Back to top ↑</a></footer>
