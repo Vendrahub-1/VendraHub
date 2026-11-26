@@ -34,6 +34,7 @@ export default function CustomerAccountPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [addressForm, setAddressForm] = useState(emptyAddress);
+  const [activeSection, setActiveSection] = useState('profile');
 
   async function load() {
     setError('');
@@ -66,6 +67,23 @@ export default function CustomerAccountPage() {
   }
 
   useEffect(() => { void load(); }, []);
+
+  useEffect(() => {
+    const sections = navigation
+      .map(item => document.getElementById(item.id))
+      .filter((section): section is HTMLElement => section !== null);
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries
+        .filter(entry => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (visible[0]?.target.id) setActiveSection(visible[0].target.id);
+    }, { rootMargin: '-18% 0px -62% 0px', threshold: [0, 0.15, 0.35, 0.6] });
+
+    sections.forEach(section => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   async function saveProfile(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError(''); setNotice('');
@@ -162,7 +180,13 @@ export default function CustomerAccountPage() {
           <p className="customer-sidebar-title">ACCOUNT MENU</p>
           <nav className="customer-account-nav" aria-label="Customer account sections">
             {navigation.map(item => (
-              <a href={'#' + item.id} key={item.id}>
+              <a
+                href={'#' + item.id}
+                key={item.id}
+                className={activeSection === item.id ? 'is-active' : undefined}
+                aria-current={activeSection === item.id ? 'location' : undefined}
+                onClick={() => setActiveSection(item.id)}
+              >
                 <span className="customer-nav-number">{item.mark}</span>
                 <span>{item.short}</span>
                 <span className="customer-nav-arrow" aria-hidden="true">↗</span>
