@@ -18,6 +18,10 @@ export default function CustomerSidebar() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  function closeMenu() {
+    setOpen(false);
+  }
+
   async function signOut() {
     setBusy(true);
     const supabase = createClient();
@@ -25,29 +29,41 @@ export default function CustomerSidebar() {
     setBusy(false);
     if (!error) {
       setSignedIn(false);
-      setOpen(false);
+      closeMenu();
       router.refresh();
     }
   }
 
   return (
     <div className="vh-customer-menu">
-      <button type="button" className="vh-customer-menu-trigger" aria-label="Open customer sidebar" aria-expanded={open} onClick={() => setOpen(value => !value)}>☰</button>
-      {open && <button type="button" className="vh-customer-menu-backdrop" aria-label="Close sidebar" onClick={() => setOpen(false)} />}
-      <aside className={open ? 'vh-customer-sidebar is-open' : 'vh-customer-sidebar'} aria-label="Customer sidebar" aria-hidden={!open}>
-        <div className="vh-customer-sidebar-head"><strong>VendraHub</strong><button type="button" onClick={() => setOpen(false)} aria-label="Close sidebar">×</button></div>
-        <nav aria-label="Customer secondary navigation">
-          <p className="vh-customer-sidebar-label">SHOP</p>
-          <Link href="/customer/categories" onClick={() => setOpen(false)}>Explore categories</Link>
-          <Link href="/customer/cart" onClick={() => setOpen(false)}>Shopping bag</Link>
-          <Link href="/customer/wishlist" onClick={() => setOpen(false)}>Saved items / Wishlist</Link>
-          <p className="vh-customer-sidebar-label">YOUR ORDERS</p>
-          <Link href="/customer/orders" onClick={() => setOpen(false)}>Order history & tracking</Link>
-          <Link href="/customer/orders" onClick={() => setOpen(false)}>Returns & refunds</Link>
-          <p className="vh-customer-sidebar-label">ACCOUNT & HELP</p>
-          <Link href="/customer/account#profile" onClick={() => setOpen(false)}>Personal details</Link>
-          <Link href="/customer/account#addresses" onClick={() => setOpen(false)}>Delivery addresses</Link>
-          <Link href="/customer/account#support" onClick={() => setOpen(false)}>Customer support</Link>
+      <button type="button" className="vh-customer-menu-trigger" aria-label="Open customer sidebar" aria-expanded={open} aria-controls="vh-customer-sidebar" onClick={() => setOpen(value => !value)}>☰</button>
+      {open && <button type="button" className="vh-customer-menu-backdrop" aria-label="Close sidebar" onClick={closeMenu} />}
+      <aside id="vh-customer-sidebar" className={open ? 'vh-customer-sidebar is-open' : 'vh-customer-sidebar'} aria-label="Customer sidebar" aria-hidden={!open}>
+        <div className="vh-customer-sidebar-head"><strong>VendraHub</strong><button type="button" onClick={closeMenu} aria-label="Close sidebar">×</button></div>
+        <nav aria-label="Customer screen navigation">
+          <p className="vh-customer-sidebar-label">MAIN SCREENS</p>
+          <Link href="/customer" onClick={closeMenu}>Home & product collection</Link>
+          <Link href="/customer/categories" onClick={closeMenu}>Explore categories</Link>
+          <Link href="/customer/cart" onClick={closeMenu}>Shopping bag</Link>
+          <Link href="/customer/wishlist" onClick={closeMenu}>Wishlist / Saved items</Link>
+          <p className="vh-customer-sidebar-label">ORDERS & PURCHASES</p>
+          <Link href="/customer/orders" onClick={closeMenu}>All orders & order history</Link>
+          <Link href="/customer/orders#order-details" onClick={closeMenu}>Order details</Link>
+          <Link href="/customer/orders#payment-information" onClick={closeMenu}>Payment information</Link>
+          <Link href="/customer/orders#delivery-tracking" onClick={closeMenu}>Delivery & tracking</Link>
+          <Link href="/customer/orders#cancellations" onClick={closeMenu}>Cancellations</Link>
+          <Link href="/customer/orders#returns-refunds" onClick={closeMenu}>Returns & refunds</Link>
+          <Link href="/customer/orders#order-support" onClick={closeMenu}>Order support</Link>
+          <p className="vh-customer-sidebar-label">ACCOUNT & CUSTOMER CARE</p>
+          <Link href="/customer/account" onClick={closeMenu}>Account overview</Link>
+          <Link href="/customer/account#profile" onClick={closeMenu}>Personal details</Link>
+          <Link href="/customer/account#addresses" onClick={closeMenu}>Delivery addresses</Link>
+          <Link href="/customer/account#support" onClick={closeMenu}>Customer support</Link>
+          {!signedIn && <>
+            <p className="vh-customer-sidebar-label">SIGN IN</p>
+            <Link href="/customer/login" onClick={closeMenu}>Login</Link>
+            <Link href="/customer/login?mode=signup" onClick={closeMenu}>Create an account</Link>
+          </>}
         </nav>
         {signedIn && <button type="button" className="vh-customer-sidebar-logout" onClick={signOut} disabled={busy}>{busy ? 'Signing out…' : 'Log out'}</button>}
       </aside>
