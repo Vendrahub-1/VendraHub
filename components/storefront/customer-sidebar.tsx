@@ -43,7 +43,7 @@ export default function CustomerSidebar() {
           <Link href="/customer/wishlist" onClick={() => setOpen(false)}>Saved items / Wishlist</Link>
           <p className="vh-customer-sidebar-label">YOUR ORDERS</p>
           <Link href="/customer/orders" onClick={() => setOpen(false)}>Order history & tracking</Link>
-          <Link href="/customer/orders#returns" onClick={() => setOpen(false)}>Returns & refunds</Link>
+          <Link href="/customer/orders" onClick={() => setOpen(false)}>Returns & refunds</Link>
           <p className="vh-customer-sidebar-label">ACCOUNT & HELP</p>
           <Link href="/customer/account#profile" onClick={() => setOpen(false)}>Personal details</Link>
           <Link href="/customer/account#addresses" onClick={() => setOpen(false)}>Delivery addresses</Link>
