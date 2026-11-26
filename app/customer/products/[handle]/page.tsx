@@ -17,7 +17,7 @@ export default async function CustomerProductDetail({ params }: { params: Promis
   const { handle } = await params;
   let product = null;
   try {
-    const products = await searchShopifyProducts(handle, 20);
+    const products = await searchShopifyProducts('', 20);
     product = products.find(item => item.handle === handle) ?? null;
   } catch (error) {
     if (!(error instanceof ShopifyConfigurationError)) console.error('Product detail lookup failed:', error);
