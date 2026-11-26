@@ -1,12 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
+import CustomerSidebar from '@/components/storefront/customer-sidebar';
 
 export default function CustomerCartPage() {
   return (
     <main className="vh-store">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
+        <CustomerSidebar />
       </header>
       <section className="vh-secondary-hero vh-cart-hero">
         <p className="vh-overline">YOUR SELECTION</p><h1>Your shopping<br/><em>bag.</em></h1>
