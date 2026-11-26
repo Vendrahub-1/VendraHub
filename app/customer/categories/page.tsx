@@ -22,7 +22,7 @@ export default async function CustomerCategoriesPage() {
     <main className="vh-store">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <nav aria-label="Store navigation"><Link href="/customer">Shop</Link><Link href="/customer/account">My account</Link><Link href="/customer/cart" className="vh-store-signin">Shopping bag</Link></nav>
+        
       </header>
       <section className="vh-secondary-hero">
         <p className="vh-overline">FIND YOUR STYLE</p><h1>Explore the<br/><em>collections.</em></h1>
