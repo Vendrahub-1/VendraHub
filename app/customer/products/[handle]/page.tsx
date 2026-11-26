@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CheckoutButton from '@/components/storefront/checkout-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
-import CustomerSidebar from '@/components/storefront/customer-sidebar';
 import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +28,6 @@ export default async function CustomerProductDetail({ params }: { params: Promis
     <main className="vh-store vh-product-detail-page">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <CustomerSidebar />
       </header>
       <p className="vh-breadcrumb"><Link href="/customer">Home</Link> / <Link href="/customer/categories">Shop</Link> / {product.title}</p>
       <section className="vh-product-detail">
