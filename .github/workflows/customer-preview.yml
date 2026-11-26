@@ -63,7 +63,7 @@ jobs:
           PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
         run: |
           set -e
-          for route in /customer /customer/categories /customer/cart /customer/login /customer/account; do
+          for route in /customer /customer/categories /customer/wishlist /customer/orders /customer/cart /customer/login /customer/account; do
             status="$(curl -sS -o /tmp/vendrahub-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL$route")"
             echo "$route returned HTTP $status"
             case "$status" in
@@ -83,6 +83,9 @@ jobs:
             echo "Preview URL: $PREVIEW_URL"
             echo ""
             echo "- Storefront: $PREVIEW_URL/customer"
+            echo "- Categories: $PREVIEW_URL/customer/categories"
+            echo "- Wishlist: $PREVIEW_URL/customer/wishlist"
+            echo "- Orders: $PREVIEW_URL/customer/orders"
             echo "- Customer account: $PREVIEW_URL/customer/account"
             echo "- Customer sign-in: $PREVIEW_URL/customer/login"
             echo ""
