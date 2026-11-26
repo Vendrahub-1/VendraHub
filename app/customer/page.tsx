@@ -69,6 +69,21 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
         </div>
       </section>
 
+      <section className="vh-customer-help-hub" aria-labelledby="customer-help-title">
+        <div>
+          <p className="vh-overline">HERE WHEN YOU NEED US</p>
+          <h2 id="customer-help-title">Your VendraHub shortcuts</h2>
+          <p>Find your orders, saved items, delivery details and customer support from one place.</p>
+        </div>
+        <div className="vh-customer-help-links">
+          <Link href="/customer/orders">Orders, tracking & returns <span aria-hidden="true">→</span></Link>
+          <Link href="/customer/wishlist">Your wishlist <span aria-hidden="true">→</span></Link>
+          <Link href="/customer/cart">Shopping bag <span aria-hidden="true">→</span></Link>
+          <Link href="/customer/account#addresses">Delivery addresses <span aria-hidden="true">→</span></Link>
+          <Link href="/customer/account#support">Contact customer support <span aria-hidden="true">→</span></Link>
+        </div>
+      </section>
+
       <footer className="vh-store-footer"><Link href="/">VendraHub</Link><span>Secure checkout powered by Shopify</span><Link href="/customer/account">Your account →</Link></footer>
       <CustomerBottomNav active="Home" />
     </main>
