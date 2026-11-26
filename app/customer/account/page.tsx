@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
-import CustomerSidebar from '@/components/storefront/customer-sidebar';
 
 type Profile = { full_name: string | null; avatar_url?: string | null };
 type Ticket = { id: string; subject: string; status: string; created_at: string };
@@ -159,7 +158,6 @@ export default function CustomerAccountPage() {
         <Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop">
           <Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority />
         </Link>
-        <CustomerSidebar />
       </header>
 
       <section className="customer-account-hero">
