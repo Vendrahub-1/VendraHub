@@ -3,8 +3,8 @@ import Link from 'next/link';
 const items = [
   { href: '/customer', label: 'Home', mark: '⌂' },
   { href: '/customer/categories', label: 'Categories', mark: '▦' },
-  { href: '/customer/account#wishlist', label: 'Wishlist', mark: '♡' },
-  { href: '/customer/account#orders', label: 'Orders', mark: '▤' },
+  { href: '/customer/wishlist', label: 'Wishlist', mark: '♡' },
+  { href: '/customer/orders', label: 'Orders', mark: '▤' },
   { href: '/customer/account', label: 'Account', mark: '○' },
 ];
 
