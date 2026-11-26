@@ -159,6 +159,7 @@ export default function CustomerAccountPage() {
         <Link href="/customer" className="customer-account-brand" aria-label="VendraHub shop">
           <Image src="/vendrahub-logo.svg" alt="VendraHub" width={190} height={56} priority />
         </Link>
+        <CustomerSidebar />
       </header>
 
       <section className="customer-account-hero">
