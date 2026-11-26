@@ -836,3 +836,17 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 .vh-customer-help-links a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:9px;color:#f5f0e5;text-decoration:none;font-size:11px}
 .vh-customer-help-links a:hover{border-color:#c9a95e;color:#e6c978}
 @media(max-width:700px){.vh-customer-help-hub{grid-template-columns:1fr;gap:18px;margin:24px 0}.vh-customer-help-links{grid-template-columns:1fr}}
+
+
+/* Customer sidebar is available from every customer screen; notifications are Home-only. */
+.vh-home-header-actions{display:flex;align-items:center;gap:12px}
+.vh-home-notifications{position:relative;z-index:41}
+.vh-home-notification-trigger{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 13px;border:1px solid rgba(197,169,100,.45);border-radius:999px;background:#100d08;color:#d4b66d;font-size:11px;font-weight:700;cursor:pointer}
+.vh-home-notification-trigger span:first-child{font-size:17px}
+.vh-home-notification-panel{position:absolute;top:calc(100% + 12px);right:0;width:min(300px,84vw);padding:18px;border:1px solid rgba(212,182,109,.35);border-radius:12px;background:#100e0b;color:#f6f0e4;box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.vh-home-notification-panel strong{display:block;margin-bottom:8px;color:#e2c47a}
+.vh-home-notification-panel p{color:#c3bcae;font-size:12px;line-height:1.6}
+.vh-home-notification-panel button{margin-top:12px;padding:7px 12px;border:1px solid #9d7b36;border-radius:7px;background:transparent;color:#e2c47a;font-size:11px}
+.vh-customer-sidebar{overflow-y:auto}
+.vh-customer-sidebar nav{padding-bottom:12px}
+@media(max-width:650px){.vh-home-header-actions{gap:7px}.vh-home-notification-trigger{width:42px;min-height:42px;justify-content:center;padding:0}.vh-home-notification-trigger span:last-child{display:none}}
