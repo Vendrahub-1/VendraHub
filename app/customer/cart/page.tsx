@@ -7,7 +7,6 @@ export default function CustomerCartPage() {
     <main className="vh-store">
       <header className="vh-store-header">
         <Link href="/customer" className="vh-store-brand"><Image src="/vendrahub-logo.svg" alt="VendraHub" width={220} height={64} priority /></Link>
-        <nav aria-label="Store navigation"><Link href="/customer">Continue shopping</Link><Link href="/customer/account">My account</Link></nav>
       </header>
       <section className="vh-secondary-hero vh-cart-hero">
         <p className="vh-overline">YOUR SELECTION</p><h1>Your shopping<br/><em>bag.</em></h1>
