@@ -62,7 +62,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
                 ) : <div className="vh-product-no-image" aria-hidden="true">VH</div>}
                 <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available' : 'Sold out'}</span>
               </div>
-              <div className="vh-product-info"><h3><Link href={"/customer/products/" + encodeURIComponent(product.handle)}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={"/customer/products/" + encodeURIComponent(product.handle)}>View details →</Link><CheckoutButton variantId={product.variantId} available={product.availableForSale} /></div>
+              <div className="vh-product-info"><h3><Link href={`/customer/products/${product.handle}`}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={`/customer/products/${product.handle}`}>View details →</Link><CheckoutButton variantId={product.variantId} available={product.availableForSale} /></div>
             </article>
           ))}
         </div>
