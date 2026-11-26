@@ -111,7 +111,7 @@ export default function CustomerSidebar() {
             const active = !item.href.includes('#') && pathname === targetPath;
             return (
               <Link
-                href={item.href}
+                href={item.href as import('next').Route}
                 key={item.href}
                 onClick={closeMenu}
                 aria-current={active ? 'page' : undefined}
