@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import AdminWorkspace from '@/components/admin/admin-workspace';
 import ProductsManager from '@/components/admin/products-manager';
+import OperationsManager from '@/components/admin/operations-manager';
 import { createClient } from '@/lib/supabase/server';
 
 type Row = Record<string, string | number | null>;
@@ -47,7 +48,7 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
   let rows: Row[] = [];
   let count = 0;
   let errorMessage = '';
-  if (config.table && section !== 'products') {
+  if (config.table && !['products', 'orders', 'customers', 'inventory', 'support'].includes(section)) {
     const countResult = await supabase.from(config.table).select('*', { count: 'exact', head: true });
     count = countResult.count ?? 0;
     const columns = (config.columns ?? []).map(column => column.key).join(',');
@@ -64,6 +65,8 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
       </section>
       {section === 'products' ? (
         <ProductsManager />
+      ) : ['orders', 'customers', 'inventory', 'support'].includes(section) ? (
+        <OperationsManager section={section as 'orders' | 'customers' | 'inventory' | 'support'} />
       ) : section === 'assistant' ? (
         <div className="admin-ai-layout">
           <article className="admin-card admin-ai-panel">
