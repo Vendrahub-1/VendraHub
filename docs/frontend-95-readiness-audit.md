@@ -91,3 +91,23 @@ The admin navigation defines 13 entries: Overview, Products, Orders, Customers, 
 - Add authenticated browser/API tests for customer and admin journeys.
 - Use sandbox/test payment credentials only; never run live charges during verification.
 - Do not modify production DNS, Workers, database policies, live supplier settings or payment settings without separate approval.
+
+
+## Customer feature implementation update
+
+Implemented on `feat/frontend-95-readiness` after the initial audit:
+
+- Added a shared wishlist state provider and save/remove buttons on the storefront product cards and product detail page. The existing authenticated `wishlist_items` API remains the source of truth; unauthenticated customers are directed to sign in.
+- Expanded Shopify Storefront product queries to return up to 20 variants per product, including variant IDs, availability, selected options, and variant prices.
+- Added product-detail variant selection, quantity selection, add-to-bag, and buy-now actions. Checkout still hands off to Shopify and validates the returned HTTPS `.myshopify.com` destination.
+- Replaced the static customer orders page with live order history from Shopify Admin GraphQL, scoped to the signed-in customer's verified Supabase email. The response is private/no-store and includes line items, financial/fulfilment statuses, and carrier tracking URLs when Shopify provides them.
+- Added customer order filters and shipment tracking display. Orders without carrier data are explicitly shown as awaiting tracking rather than inventing a tracking status.
+
+### Dependencies and verification boundaries
+
+- Shopify Admin API credentials must have the required order-read access and any Shopify protected-customer-data approval required by the store. If those scopes are unavailable, the order API returns an unavailable state rather than showing fabricated orders.
+- Shopify checkout must retain the customer's email matching their verified VendraHub account for orders to appear in this email-scoped lookup. Guest checkouts using a different email will not be matched.
+- This is Shopify order history; orders from Paystack/Flutterwave/PayPal or supplier channels are not yet unified into a VendraHub order ledger.
+- Carrier scans and delivery estimates depend on fulfilment providers supplying tracking data to Shopify.
+- No Supabase schema, RLS policy, live Shopify configuration, production deployment, DNS, or production data was changed.
+- Automated build verification is required for the latest branch head; live authenticated checkout/order tests remain pending.
