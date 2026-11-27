@@ -13,7 +13,7 @@ type Order = {
 };
 
 const statuses = ['All orders', 'Unfulfilled', 'In progress', 'Fulfilled', 'Cancelled'];
-const pretty = (value: string) => value.toLowerCase().replaceAll('_', ' ').replace(/\\b\\w/g, letter => letter.toUpperCase());
+const pretty = (value: string) => value.toLowerCase().split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
 export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
