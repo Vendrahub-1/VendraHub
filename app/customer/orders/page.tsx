@@ -6,7 +6,7 @@ import Link from 'next/link';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 
 type Order = {
-  id: string; name: string; createdAt: string; financialStatus: string; fulfillmentStatus: string;
+  id: string; name: string; createdAt: string; cancelledAt: string | null; financialStatus: string; fulfillmentStatus: string;
   total: { amount: string; currencyCode: string };
   items: Array<{ title: string; quantity: number; variant: { title: string } | null }>;
   fulfillments: Array<{ createdAt: string; status: string | null; tracking: Array<{ company: string | null; number: string | null; url: string | null }> }>;
@@ -32,10 +32,10 @@ export default function CustomerOrdersPage() {
 
   const visible = orders.filter(order => {
     if (filter === 'All orders') return true;
-    if (filter === 'Unfulfilled') return order.fulfillmentStatus === 'UNFULFILLED' || order.fulfillmentStatus === 'UNSHIPPED';
-    if (filter === 'In progress') return ['IN_PROGRESS', 'PARTIALLY_FULFILLED'].includes(order.fulfillmentStatus);
-    if (filter === 'Fulfilled') return order.fulfillmentStatus === 'FULFILLED';
-    return order.fulfillmentStatus === 'CANCELLED';
+    if (filter === 'Unfulfilled') return !order.cancelledAt && ['UNFULFILLED', 'PENDING_FULFILLMENT', 'OPEN'].includes(order.fulfillmentStatus);
+    if (filter === 'In progress') return !order.cancelledAt && ['IN_PROGRESS', 'PARTIALLY_FULFILLED', 'SCHEDULED'].includes(order.fulfillmentStatus);
+    if (filter === 'Fulfilled') return !order.cancelledAt && order.fulfillmentStatus === 'FULFILLED';
+    return Boolean(order.cancelledAt);
   });
 
   return (
