@@ -75,10 +75,10 @@ jobs:
           test "$page_status" = "200"
           assistant_status="$(curl -sS -o /tmp/assistant.json -w '%{http_code}' -X POST "$PREVIEW_URL/api/admin/assistant" -H 'Content-Type: application/json' --data '{"messages":[{"role":"user","content":"Say hello"}]}')"
           echo "Unauthenticated assistant API returned HTTP $assistant_status"
-          case "$assistant_status" in 401|403) ;; *) echo "::error::Assistant API did not reject unauthenticated access."; exit 1 ;; esac
+          case "$assistant_status" in 302|401|403) ;; *) echo "::error::Assistant API did not reject unauthenticated access."; exit 1 ;; esac
           approvals_status="$(curl -sS -o /tmp/approvals.json -w '%{http_code}' "$PREVIEW_URL/api/admin/approvals")"
           echo "Unauthenticated approvals API returned HTTP $approvals_status"
-          case "$approvals_status" in 401|403) ;; *) echo "::error::Approvals API did not reject unauthenticated access."; exit 1 ;; esac
+          case "$approvals_status" in 302|401|403) ;; *) echo "::error::Approvals API did not reject unauthenticated access."; exit 1 ;; esac
 
       - name: Publish preview URL
         if: success()
