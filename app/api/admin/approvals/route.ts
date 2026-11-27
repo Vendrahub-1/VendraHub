@@ -1,21 +1,6 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { jsonResponse as json, requireAdminOwner as requireOwner } from '@/lib/admin/owner-auth';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
-export const json=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
-export async function requireOwner(){
- const supabase=await createClient();
- const {data:{user},error}=await supabase.auth.getUser();
- if(error||!user||user.email?.toLowerCase()!=='vendrahub@hotmail.com')return {response:json({error:'Owner access only.'},403)};
- const {data:assurance}=await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
- if(assurance?.currentLevel!=='aal2')return {response:json({error:'Authenticator verification required.'},403)};
- const [{data:profile},{data:roles}]=await Promise.all([
-  supabase.from('admin_profiles').select('staff_status').eq('user_id',user.id).maybeSingle(),
-  supabase.from('admin_role_assignments').select('role_code').eq('user_id',user.id)
- ]);
- if(profile?.staff_status!=='active'||!roles?.some(x=>x.role_code==='super_admin'))return {response:json({error:'Active super-admin access is required.'},403)};
- return {supabase,user};
-}
 
 import { NextRequest } from 'next/server';
 const TYPES=['product_update','product_publish','order_fulfilment','order_cancellation','refund','inventory_adjustment','supplier_order','customer_account_change','support_reply','store_setting_change'];
