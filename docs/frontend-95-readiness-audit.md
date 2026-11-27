@@ -158,3 +158,34 @@ All four APIs enforce the owner identity, AAL2 MFA, active admin profile and `su
 - No refunds, cancellations, fulfilment mutations, customer account suspension/deletion, inventory adjustments, supplier orders, or live stock writes are offered in this phase.
 - No Supabase migration, production data mutation, production deployment, domain/DNS change or live payment operation was performed.
 - GitHub Actions build verification is required for this latest change set; authenticated live API checks require a configured Shopify store with the listed scopes.
+
+
+## AI assistant and approval controls implementation
+
+Added an owner-only AI operations workspace and a separate approval queue on `feat/frontend-95-readiness`.
+
+- Admin AI chat calls the OpenAI Responses API server-side. The browser never receives the API key.
+- The assistant is deliberately configured as an analysis/drafting copilot with no tools and no access to live Shopify or Supabase business records. It is instructed not to claim that it has executed changes.
+- The approval queue supports proposed action categories for product changes/publication, fulfilment, cancellation, refunds, inventory adjustments, supplier orders, customer account changes, support replies and store settings.
+- Owner can submit an approval request, review pending requests, and record approved/rejected decisions with an optional review note.
+- The new `ai_approval_requests` migration adds a constrained status/action/risk model, owner AAL2 RLS policies and indexes.
+- AI messages, approval requests and approval decisions attempt to write audit events.
+- Owner identity, active admin profile, `super_admin` role and AAL2 MFA are checked on both AI and approval APIs.
+
+### Required setup before the AI chat can connect
+
+1. Complete the OpenAI API key setup flow and store the generated key as the server-side environment secret `OPENAI_API_KEY` in the deployment environment. Do not commit it to GitHub or expose it to client-side variables.
+2. Set `OPENAI_MODEL` to a model enabled for the selected OpenAI project.
+3. Apply `supabase/migrations/20261127120000_vendrahub_ai_approvals.sql` to the VendraHub Supabase project before using the approval queue.
+4. Redeploy the application with those environment values and migration applied.
+
+### Critical execution boundary
+
+An approval decision currently records a human decision only. It does **not** execute the proposed action. No action executor, Shopify write tool, payment/refund tool, supplier-order tool, inventory mutation, or autonomous agent is connected. This is intentional: each action type must receive a separate validated executor, idempotency protection, re-check of current resource state, risk-specific confirmation and audit trail before any approved request can cause a live change.
+
+### Verification and non-actions
+
+- No API key is stored in the repository or disclosed in tool output.
+- No Supabase migration was applied to the live project.
+- No deployment, business-data mutation, refund, stock adjustment, supplier order, or payment action was performed.
+- A fresh CI build and live authenticated smoke test remain required after the latest commit.
