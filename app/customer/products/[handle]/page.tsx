@@ -1,18 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import CheckoutButton from '@/components/storefront/checkout-button';
-import AddToCartButton from '@/components/storefront/add-to-cart-button';
+import ProductPurchasePanel from '@/components/storefront/product-purchase-panel';
+import WishlistButton from '@/components/storefront/wishlist-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
-
-function formatPrice(amount: string, currency: string) {
-  const value = Number(amount);
-  if (!Number.isFinite(value)) return `${amount} ${currency}`;
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value);
-}
 
 export default async function CustomerProductDetail({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
@@ -38,11 +32,9 @@ export default async function CustomerProductDetail({ params }: { params: Promis
         <div className="vh-product-detail-copy">
           <p className="vh-overline">THE VENDRAHUB COLLECTION</p>
           <h1>{product.title}</h1>
-          <strong className="vh-product-detail-price">{formatPrice(product.price, product.currencyCode)}</strong>
           <p>{product.description || 'A considered pick from the VendraHub fashion and lifestyle collection.'}</p>
           <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available to purchase' : 'Currently sold out'}</span>
-          <AddToCartButton product={product} available={product.availableForSale} />
-          <CheckoutButton variantId={product.variantId} available={product.availableForSale} />
+          <ProductPurchasePanel product={product} />
           <p className="vh-product-detail-note">Secure payment is completed through Shopify checkout.</p>
           <Link href="/customer/categories" className="vh-back-link">← Continue browsing</Link>
         </div>
