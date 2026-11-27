@@ -5,6 +5,7 @@ import { useVendraCart } from '@/components/storefront/cart-provider';
 
 export default function AddToCartButton({
   product,
+  available,
 }: {
   product: {
     id: string;
@@ -15,12 +16,13 @@ export default function AddToCartButton({
     currencyCode: string;
     variantId: string | null;
   };
+  available: boolean;
 }) {
   const { addItem } = useVendraCart();
   const [added, setAdded] = useState(false);
 
   function add() {
-    if (!product.variantId) return;
+    if (!product.variantId || !available) return;
     addItem({
       variantId: product.variantId,
       productId: product.id,
@@ -35,8 +37,8 @@ export default function AddToCartButton({
   }
 
   return (
-    <button type="button" className="vh-button vh-button-dark" onClick={add} disabled={!product.variantId}>
-      {added ? 'Added to bag ✓' : product.variantId ? 'Add to bag' : 'Unavailable'}
+    <button type="button" className="vh-button vh-button-dark" onClick={add} disabled={!product.variantId || !available}>
+      {added ? 'Added to bag ✓' : available && product.variantId ? 'Add to bag' : 'Unavailable'}
     </button>
   );
 }
