@@ -136,3 +136,25 @@ Implemented the first live Shopify-backed product management workflow on `feat/f
 - Shopify remains the product system of record; this implementation does not write product records to Supabase or migrate existing catalogue rows.
 - No live Shopify product was created or edited during code implementation. No database migration, production deployment, domain/DNS change, or destructive operation was performed.
 - The current branch's GitHub Actions build must complete before this feature is considered build-verified; authenticated Shopify create/edit/publish tests require a connected store and the required API permissions.
+
+
+## Admin operations workspaces update
+
+Added protected operational workspaces on `feat/frontend-95-readiness`:
+
+- **Orders:** reads the latest 50 Shopify orders with customer display name, order date, total/currency, financial status, fulfilment status and line-item summaries. It is intentionally read-only; refund, cancellation, return and fulfilment mutations are not exposed.
+- **Customers:** reads the latest 50 Shopify customer records with contact fields, order count, lifetime spend and registration date. Access is restricted to the owner super-admin session; Shopify customer-data approval and `read_customers` scope are required.
+- **Inventory:** reads Shopify product variants and their inventory-tracked state, SKU and available quantity. No quantity adjustment, purchase order, supplier sync or location-specific mutation is exposed.
+- **Customer Support:** reads the latest 100 Supabase support tickets and allows the owner to change a ticket among the existing supported statuses (`open`, `in_progress`, `waiting_on_customer`, `resolved`, `closed`). Status changes are confirmation-gated and audited.
+
+All four APIs enforce the owner identity, AAL2 MFA, active admin profile and `super_admin` role server-side, and return private/no-store responses.
+
+### Explicit limitations / prerequisites
+
+- Shopify orders require `read_orders`; protected customer-data approval may be required for customer/contact fields. Historical access beyond Shopify's default window may require `read_all_orders`.
+- Shopify customer records require `read_customers` and applicable protected customer-data approval.
+- Inventory visibility depends on Shopify product/inventory read scopes. The current view aggregates variant quantities and is not a location-aware stock ledger.
+- Support replies, staff assignment, attachments, SLA timers and customer-visible conversation threads are not implemented because the current `support_tickets` schema has no message-thread or assignment model.
+- No refunds, cancellations, fulfilment mutations, customer account suspension/deletion, inventory adjustments, supplier orders, or live stock writes are offered in this phase.
+- No Supabase migration, production data mutation, production deployment, domain/DNS change or live payment operation was performed.
+- GitHub Actions build verification is required for this latest change set; authenticated live API checks require a configured Shopify store with the listed scopes.
