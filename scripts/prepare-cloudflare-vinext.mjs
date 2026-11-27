@@ -34,6 +34,16 @@ if (!config.includes("WORKER_SELF_REFERENCE:")) {
   }
 }
 
+if (workerName === "vendrahub" && !config.includes("OPENAI_MODEL:")) {
+  const serviceBinding = /WORKER_SELF_REFERENCE:\s*bindings\.worker\(\{\s*worker:\s*"vendrahub"\s*\}\),?/;
+  if (!serviceBinding.test(config)) {
+    throw new Error("Unexpected vinext config: unable to add the admin AI model binding.");
+  }
+  config = config.replace(
+    serviceBinding,
+    (match) => match + "\n      OPENAI_MODEL: bindings.text(\"gpt-6.2-astra\"),",
+  );
+}
 const compatibilityDate = /compatibilityDate\s*:\s*["'][^"']+["']\s*,?/;
 if (!compatibilityDate.test(config)) {
   throw new Error("Unexpected vinext config: missing compatibility date; refusing to deploy with incomplete bindings.");
