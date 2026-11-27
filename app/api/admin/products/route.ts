@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
   const after = request.nextUrl.searchParams.get('after');
   const queryParts: string[] = [];
   if (status === 'ACTIVE' || status === 'DRAFT' || status === 'ARCHIVED') queryParts.push(`status:${status.toLowerCase()}`);
-  if (search) queryParts.push(`title:*${search.replace(/[\\:"()]/g, ' ')}*`);
+  if (search) queryParts.push(`title:*${search.replace(/[^\p{L}\p{N}\s-]/gu, ' ')}*`);
   try {
     const data = await shopifyAdminGraphql<ProductList>(LIST_QUERY, { first: 40, after: after || null, query: queryParts.join(' ') || null });
     return json({ products: data.products.nodes, pageInfo: data.products.pageInfo });
