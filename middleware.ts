@@ -10,8 +10,8 @@ export async function middleware(request: NextRequest) {
   const key = SUPABASE_PUBLISHABLE_KEY;
   const pathname = request.nextUrl.pathname;
   const hostname = request.nextUrl.hostname.toLowerCase();
-  const isAdminHost = hostname === 'admin.vendrahub.com' || hostname === 'vendrahub.vendrahub.workers.dev';
-  const isCustomerHost = hostname === 'vendrahub.com' || hostname === 'www.vendrahub.com' || hostname === 'vendrahub-customer.vendrahub.workers.dev';
+  const isAdminHost = hostname === 'admin.shopvendrahub.com' || hostname === 'admin.vendrahub.com' || hostname === 'vendrahub.vendrahub.workers.dev';
+  const isCustomerHost = hostname === 'shopvendrahub.com' || hostname === 'www.shopvendrahub.com' || hostname === 'vendrahub.com' || hostname === 'www.vendrahub.com' || hostname === 'vendrahub-customer.vendrahub.workers.dev';
   const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
   const isCustomerPath = pathname.startsWith('/customer') || pathname.startsWith('/api/customer');
 
@@ -27,11 +27,11 @@ export async function middleware(request: NextRequest) {
   }
   if (isAdminHost && isCustomerPath) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Customer API is served only from the customer storefront.' }, { status: 404 });
-    return NextResponse.redirect(new URL('/', 'https://vendrahub.com'));
+    return NextResponse.redirect(new URL('/', 'https://shopvendrahub.com'));
   }
   if (isCustomerHost && isAdminPath) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Admin API is served only from the admin portal.' }, { status: 404 });
-    return NextResponse.redirect(new URL('/', 'https://admin.vendrahub.com'));
+    return NextResponse.redirect(new URL('/', 'https://admin.shopvendrahub.com'));
   }
 
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
