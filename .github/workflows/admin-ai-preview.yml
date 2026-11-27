@@ -1,0 +1,96 @@
+name: VendraHub admin AI Cloudflare preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendrahub-admin-ai-preview
+  cancel-in-progress: true
+
+jobs:
+  build-and-preview:
+    name: Build and smoke-test admin AI preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out merged main code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Install project dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify vinext compatibility
+        run: npx --yes vinext check
+
+      - name: Initialize isolated Cloudflare preview build
+        env:
+          CF_WORKER_NAME: vendrahub
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "::error::Missing CLOUDFLARE_API_TOKEN repository secret" && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "::error::Missing CLOUDFLARE_ACCOUNT_ID repository secret" && exit 1)
+          npx --yes vinext init --platform=cloudflare --name=vendrahub --cdn-cache=none --data-cache=none --image-optimization=none --no-prerender --force
+          node scripts/prepare-cloudflare-vinext.mjs
+
+      - name: TypeScript verification
+        run: npx tsc --noEmit
+
+      - name: Build and deploy isolated preview
+        id: deploy
+        env:
+          CF_WORKER_NAME: vendrahub
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -o pipefail
+          npx @vinext/cloudflare previews deploy --preview-name admin-ai-integration 2>&1 | tee admin-ai-preview-deploy.log
+          PREVIEW_URL="$(grep -Eo 'https://[a-zA-Z0-9.-]+\.workers\.dev' admin-ai-preview-deploy.log | head -n 1)"
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error::Cloudflare did not print a preview URL."
+            exit 1
+          fi
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+          echo "Admin AI preview: $PREVIEW_URL"
+
+      - name: Smoke-test admin page and protected API routes
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+        run: |
+          set -euo pipefail
+          page_status="$(curl -sS -L --max-redirs 5 -o /tmp/vendrahub-admin-preview.html -w '%{http_code}' --retry 5 --retry-delay 3 --retry-all-errors "$PREVIEW_URL/admin")"
+          echo "/admin returned HTTP $page_status"
+          test "$page_status" = "200"
+          assistant_status="$(curl -sS -o /tmp/assistant.json -w '%{http_code}' -X POST "$PREVIEW_URL/api/admin/assistant" -H 'Content-Type: application/json' --data '{"messages":[{"role":"user","content":"Say hello"}]}')"
+          echo "Unauthenticated assistant API returned HTTP $assistant_status"
+          case "$assistant_status" in 401|403) ;; *) echo "::error::Assistant API did not reject unauthenticated access."; exit 1 ;; esac
+          approvals_status="$(curl -sS -o /tmp/approvals.json -w '%{http_code}' "$PREVIEW_URL/api/admin/approvals")"
+          echo "Unauthenticated approvals API returned HTTP $approvals_status"
+          case "$approvals_status" in 401|403) ;; *) echo "::error::Approvals API did not reject unauthenticated access."; exit 1 ;; esac
+
+      - name: Publish preview URL
+        if: success()
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+        run: |
+          {
+            echo "## VendraHub admin AI preview"
+            echo ""
+            echo "Preview URL: $PREVIEW_URL"
+            echo ""
+            echo "- Admin workspace: $PREVIEW_URL/admin"
+            echo "- Assistant API: $PREVIEW_URL/api/admin/assistant (protected)"
+            echo "- Approval API: $PREVIEW_URL/api/admin/approvals (protected)"
+            echo ""
+            echo "Build and unauthenticated-access smoke tests passed. Authenticated AI response testing requires owner AAL2 sign-in and configured preview secrets."
+          } >> "$GITHUB_STEP_SUMMARY"
