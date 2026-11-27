@@ -962,3 +962,32 @@ p { margin: 0; line-height: 1.6; color: #626262; }
 .admin-product-actions{display:flex;gap:6px;flex-wrap:wrap}
 .admin-products-footnote{font-size:11px;color:#777;line-height:1.5}
 @media(max-width:700px){.admin-products-toolbar{align-items:stretch}.admin-products-filters{display:grid;grid-template-columns:1fr}.admin-product-form-grid{grid-template-columns:1fr}.admin-product-form-grid .admin-product-description{grid-column:auto}.admin-product-actions{min-width:145px}}
+
+
+/* VendraHub AI assistant and approval controls */
+.admin-ai-workspace{display:grid;gap:18px}
+.admin-ai-workspace .admin-ai-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.7fr);gap:18px;align-items:start}
+.admin-ai-panel{display:grid;gap:14px}
+.admin-ai-panel h2{margin:0;font-family:Georgia,serif;font-size:28px;font-weight:500}
+.admin-ai-panel>p{margin:0;color:#777;font-size:13px;line-height:1.6}
+.admin-ai-prompts{display:flex;gap:8px;flex-wrap:wrap}
+.admin-ai-prompts button{padding:8px 11px;border:1px solid #e0d8c7;border-radius:999px;background:#fff;color:#51482f;font-size:11px;cursor:pointer}
+.admin-ai-chat{display:grid;gap:10px;max-height:440px;overflow:auto;padding:12px;border:1px solid #e7e1d5;border-radius:12px;background:#faf9f6}
+.admin-ai-message{max-width:92%;padding:12px 14px;border-radius:12px;background:#fff;border:1px solid #e8e2d6}
+.admin-ai-message.user{justify-self:end;background:#211e16;border-color:#211e16;color:#f7f1e3}
+.admin-ai-message strong{font-size:11px;color:#a1843d}
+.admin-ai-message p{margin:6px 0 0;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.admin-ai-message.user strong{color:#e4cf8b}
+.admin-ai-input{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.admin-ai-input textarea{width:100%;resize:vertical;min-height:48px;padding:12px;border:1px solid #ddd5c5;border-radius:9px;font:inherit}
+.admin-ai-input button,.admin-ai-decision button,.admin-ai-approval-form button{min-height:40px;padding:9px 14px;border:1px solid #171717;border-radius:8px;background:#171717;color:#e4cf8b;font-size:12px;font-weight:700;cursor:pointer}
+.admin-ai-input button:disabled,.admin-ai-approval-form button:disabled{opacity:.5;cursor:not-allowed}
+.admin-ai-approval-form{display:grid;gap:16px}
+.admin-ai-approval-form .admin-product-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admin-ai-approval-form .admin-product-form label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#514b3e}
+.admin-ai-approval-form .admin-product-form input,.admin-ai-approval-form .admin-product-form select,.admin-ai-approval-form .admin-product-form textarea{width:100%;min-height:42px;padding:10px 12px;border:1px solid #ddd5c5;border-radius:8px;background:#fff;color:#191919;font:inherit}
+.admin-ai-approval-form .admin-product-form .full,.admin-ai-approval-form .admin-product-form-actions{grid-column:1/-1}
+.admin-ai-decision{display:flex;gap:6px;flex-wrap:wrap}
+.admin-ai-decision .admin-products-secondary{color:#25231e;background:#fff;border-color:#d8d0c0}
+@media(max-width:800px){.admin-ai-workspace .admin-ai-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.admin-ai-approval-form .admin-product-form{grid-template-columns:1fr}.admin-ai-approval-form .admin-product-form .full,.admin-ai-approval-form .admin-product-form-actions{grid-column:auto}.admin-ai-input{grid-template-columns:1fr}.admin-ai-input button{width:100%}}
