@@ -1,6 +1,8 @@
 name: VendraHub admin AI Cloudflare preview
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
