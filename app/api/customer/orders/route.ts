@@ -7,7 +7,7 @@ const json = (body: unknown, status = 200) => NextResponse.json(body, { status, 
 
 type OrdersResponse = {
   orders: { nodes: Array<{
-    id: string; name: string; createdAt: string; displayFinancialStatus: string;
+    id: string; name: string; createdAt: string; cancelledAt: string | null; displayFinancialStatus: string;
     displayFulfillmentStatus: string; totalPriceSet: { shopMoney: { amount: string; currencyCode: string } };
     lineItems: { nodes: Array<{ title: string; quantity: number; variant: { title: string } | null }> };
     fulfillments: Array<{ createdAt: string; displayStatus: string | null; trackingInfo: Array<{ company: string | null; number: string | null; url: string | null }> }>;
@@ -18,7 +18,7 @@ const ORDERS_QUERY = `
   query VendraHubCustomerOrders($first: Int!, $query: String!) {
     orders(first: $first, query: $query, sortKey: CREATED_AT, reverse: true) {
       nodes {
-        id name createdAt displayFinancialStatus displayFulfillmentStatus
+        id name createdAt cancelledAt displayFinancialStatus displayFulfillmentStatus
         totalPriceSet { shopMoney { amount currencyCode } }
         lineItems(first: 30) { nodes { title quantity variant { title } } }
         fulfillments {
@@ -40,7 +40,7 @@ export async function GET() {
     const query = 'email:' + email.replaceAll(' ', '').replaceAll('"', '').replaceAll(':', '').replaceAll('(', '').replaceAll(')', '');
     const data = await shopifyAdminGraphql<OrdersResponse>(ORDERS_QUERY, { first: 30, query });
     const orders = data.orders.nodes.map(order => ({
-      id: order.id, name: order.name, createdAt: order.createdAt,
+      id: order.id, name: order.name, createdAt: order.createdAt, cancelledAt: order.cancelledAt,
       financialStatus: order.displayFinancialStatus, fulfillmentStatus: order.displayFulfillmentStatus,
       total: order.totalPriceSet.shopMoney,
       items: order.lineItems.nodes,
