@@ -114,3 +114,25 @@ Implemented on `feat/frontend-95-readiness` after the initial audit:
 
 - Order filters use Shopify's actual cancellation timestamp and fulfilment enums rather than assuming a made-up `CANCELLED` fulfilment state.
 - Shopify Admin API access to historical orders is subject to the store's granted scopes; without Shopify's `read_all_orders` approval, Shopify's default order visibility may be limited to the most recent 60 days.
+
+
+## Admin product management implementation
+
+Implemented the first live Shopify-backed product management workflow on `feat/frontend-95-readiness`:
+
+- Replaced the Products section's read-only Supabase table with a dedicated Shopify product workspace.
+- Added live product listing, title search, status filtering, product images, primary variant price/SKU and inventory visibility.
+- Added product creation. New products are created as Shopify drafts, with title, description, vendor, product type, tags, primary variant price/SKU and an optional HTTPS image URL.
+- Added product editing for product details and primary variant price/SKU.
+- Added explicit-confirmation publish and unpublish actions targeting the Shopify Online Store publication.
+- Added server-side owner identity, AAL2 MFA, active staff profile and super-admin role checks to every product API operation.
+- Added audit events for successful create, edit, publish and unpublish actions. No product delete control is exposed.
+
+### Shopify prerequisites and current scope
+
+- Shopify Admin API must grant `read_products` and `write_products` (and the app user must have product-management permissions). Publication requires the relevant publication/channel access and an Online Store publication.
+- Product creation currently creates the initial/default variant; the editor updates the primary variant. Multi-option variant matrix editing, stock quantity adjustments, bulk import/export, and destructive archive/delete actions are not included in this first workflow.
+- Product image entry accepts an HTTPS image URL. Local file upload/media library integration remains future work.
+- Shopify remains the product system of record; this implementation does not write product records to Supabase or migrate existing catalogue rows.
+- No live Shopify product was created or edited during code implementation. No database migration, production deployment, domain/DNS change, or destructive operation was performed.
+- The current branch's GitHub Actions build must complete before this feature is considered build-verified; authenticated Shopify create/edit/publish tests require a connected store and the required API permissions.
