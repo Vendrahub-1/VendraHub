@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CheckoutButton from '@/components/storefront/checkout-button';
+import AddToCartButton from '@/components/storefront/add-to-cart-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
 
@@ -40,6 +41,7 @@ export default async function CustomerProductDetail({ params }: { params: Promis
           <strong className="vh-product-detail-price">{formatPrice(product.price, product.currencyCode)}</strong>
           <p>{product.description || 'A considered pick from the VendraHub fashion and lifestyle collection.'}</p>
           <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available to purchase' : 'Currently sold out'}</span>
+          <AddToCartButton product={product} available={product.availableForSale} />
           <CheckoutButton variantId={product.variantId} available={product.availableForSale} />
           <p className="vh-product-detail-note">Secure payment is completed through Shopify checkout.</p>
           <Link href="/customer/categories" className="vh-back-link">← Continue browsing</Link>
