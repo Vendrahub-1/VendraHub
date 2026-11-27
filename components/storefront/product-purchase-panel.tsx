@@ -25,13 +25,13 @@ export default function ProductPurchasePanel({ product, checkoutEnabled = false 
   const currency = selected?.currencyCode ?? product.currencyCode;
 
   function add() {
-    if (!checkoutEnabled || !selectedId || !available) return;
+    if (!selectedId || !available) return;
     addItem({ variantId: selectedId, productId: product.id, handle: product.handle, title: product.title + (selected?.title && selected.title !== 'Default Title' ? ' — ' + selected.title : ''), imageUrl: product.imageUrl, price, currencyCode: currency }, quantity);
     setNotice('Added to your shopping bag.');
   }
 
   async function buyNow() {
-    if (!selectedId || !available) return;
+    if (!checkoutEnabled || !selectedId || !available) return;
     setNotice('');
     try {
       const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lines: [{ merchandiseId: selectedId, quantity }] }) });
