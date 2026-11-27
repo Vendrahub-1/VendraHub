@@ -1,59 +1,90 @@
 # VendraHub
 
-VendraHub is a Next.js commerce starter with separate admin and customer experience routes, plus a Capacitor Android packaging scaffold.
+VendraHub is a Next.js 15 / React 19 commerce platform with separate customer and owner-admin experiences, a Shopify catalogue integration, Supabase authentication/data services, and a Capacitor Android packaging scaffold.
 
-## Supabase application connection
+## Current platform architecture
 
-The connected Supabase project is VendraHub (szishzerqvbdvhmysqpv) in eu-west-1. Its project URL is prefilled in .env.example; add the project's publishable key to your local environment or hosting configuration. The publishable key is designed for browser use, but database access must still be protected with Row Level Security (RLS). Never place a Supabase secret/service-role key in browser code or a NEXT_PUBLIC_ variable.
+- **Customer storefront:** `/customer` — Shopify product discovery, product detail, variant selection, wishlist, browser-persisted multi-item cart, customer account, addresses, support and order history.
+- **Owner administration:** `/admin` — owner sign-in with authenticator MFA, Shopify product management, order/customer/inventory visibility, support-ticket status management, reporting workspaces and approval-gated AI assistance.
+- **Supabase:** project `szishzerqvbdvhmysqpv` in `eu-west-1`. The application uses cookie-based Supabase SSR clients and Row Level Security. Customer profile, wishlist, address and support routes use the signed-in user's identity. Admin APIs verify the owner session, AAL2 MFA, active admin profile and super-admin role server-side.
+- **Shopify:** Shopify remains the current catalogue and order system of record. Storefront API access is read-only; the separately authenticated Admin API is used for protected product-management and operational read workflows.
 
-The Supabase project is currently a clean database with no application tables or migrations. The Next.js application integration (SSR auth clients, session handling, schema and RLS policies) is not yet implemented. Do not treat the admin preview as authenticated until that work is complete and tested.
+The Supabase project has application tables and RLS policies. It is not an empty/clean database. The current local `products`, `product_variants`, `orders`, `order_items` and `payment_records` tables contain no operational records; the live catalogue and Shopify order history are currently read from Shopify where the required credentials and scopes are available.
 
-## Shopify storefront connection
+## Customer experience
 
-The customer page reads up to 20 products from the Shopify Storefront GraphQL API. It is read-only: it does not create orders, change inventory, or access customer records. The private Storefront API token is only used by server-side code and must never be exposed in a `NEXT_PUBLIC_*` variable.
+- Storefront search and product cards use the Shopify Storefront GraphQL API.
+- Product detail is fetched directly by Shopify product handle and includes available variant options and variant-specific prices.
+- Wishlist changes are stored for the signed-in customer in Supabase.
+- Cart items are persisted in the customer's browser storage. The cart is not yet synchronised across devices.
+- Customer order history uses the verified sign-in email to look up matching Shopify orders. Tracking is shown only when Shopify provides fulfilment/tracking data.
+- Customer profile, delivery-address and support-ticket APIs require a signed-in customer and return private, no-store responses.
 
-1. In Shopify Admin, enable the Headless sales channel and create a private Storefront API access token with only the required product-read access.
-2. Copy `.env.example` to `.env.local` and set `SHOPIFY_STOREFRONT_PRIVATE_TOKEN`.
-3. Install dependencies and run the app:
+## Owner administration
 
-```bash
-cp .env.example .env.local
-npm install
-npm run dev
-```
+- Admin routes require the owner identity, AAL2 authenticator verification, an active admin profile and a super-admin role.
+- Product workspace supports Shopify product listing/search/status filtering, draft creation, product editing, and confirmed publish/unpublish actions. Product deletion is intentionally not exposed.
+- Orders, customers and inventory are currently read-only views. Support ticket status changes are confirmation-gated and audited.
+- AI assistance is a server-side drafting/research copilot. Approval records represent a human decision; they do not automatically execute the proposed business action.
+- Shopify Admin API permissions and any required protected-customer-data approval must be configured in Shopify before those views/actions can work against live store data.
 
-The storefront will then be available at `http://localhost:3000/customer`. `GET /api/products` returns a bounded product list and never returns credentials. The app fails closed with a configuration message if the token is not set.
+## Shopify configuration
+
+Set the following values in the deployment secret manager. Do not commit real credentials or expose private values through `NEXT_PUBLIC_*` variables.
+
+- `SHOPIFY_STORE_DOMAIN` — for example, `vendrahub-store.myshopify.com`.
+- `SHOPIFY_STOREFRONT_API_VERSION` — currently `2026-10`.
+- `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` — server-side Storefront API token with the required product-read scope.
+- `SHOPIFY_ADMIN_API_VERSION` — currently `2026-10`.
+- `SHOPIFY_ADMIN_ACCESS_TOKEN`, or the app credentials `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` for the server-side client-credentials token exchange.
+- Admin API scopes must match the specific feature: product read/write, order read, customer read, and inventory read. Customer data access may also require Shopify approval.
+
+## Supabase configuration
+
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are the browser-safe project configuration.
+- Never put a Supabase secret/service-role key in browser code or a `NEXT_PUBLIC_*` variable.
+- Keep RLS enabled and review policies against the actual customer/owner access model before adding new tables or endpoints.
+- `ADMIN_RECOVERY_COOKIE_SECRET` is a server-side secret used to sign short-lived owner password-recovery proofs.
+
+## Payments and live operations — paused
+
+Payments are deliberately not part of this platform build phase. The existing Shopify checkout handoff is disabled by default in both the server API and customer UI:
+
+- `CHECKOUT_ENABLED=false` — server-side enforcement; the API rejects checkout creation unless explicitly enabled.
+- `NEXT_PUBLIC_CHECKOUT_ENABLED=false` — customer UI display flag; this is not a security control by itself.
+
+Do not enable either flag until the platform has passed the agreed tests and the owner separately approves the payment integration and launch. The Supabase `operational_safety` settings currently keep payments, live order processing, supplier purchases, product imports, inventory changes and fulfilment automation disabled. Do not enable those settings as part of frontend testing.
 
 ## Supplier connections
 
-VendraHub uses the Shopify-app-first approach for Syncee and DSers. Their standard store-owner workflows connect through each supplier's Shopify app and Shopify's merchant-authorised OAuth flow; do not invent or request API tokens for these app-first connections. Install each app from the Shopify Admin Apps area, confirm the correct store, and review the requested permissions before authorising.
+VendraHub uses the Shopify-app-first approach for Syncee and DSers. Their standard store-owner workflows connect through each supplier's Shopify app and Shopify's merchant-authorised OAuth flow; do not invent or request API tokens for these app-first connections. Install each app from Shopify Admin, confirm the correct store, and review the requested permissions before authorising.
 
 - Syncee installation guide: https://help.syncee.com/en/articles/8886065-how-to-install-syncee-to-your-shopify-store
 - DSers Shopify connection guide: https://help.dsers.com/link-shopify-store/
 
-CJdropshipping can also connect through its Shopify app. A separate direct CJ API integration is optional. For that route, create an API key in the CJ account's API settings, then follow CJ's documented access-token flow. The key and returned access/refresh tokens must be stored in a server-side secret manager; never send them in chat or commit them to Git.
+CJdropshipping can connect through its Shopify app. A separate direct CJ API integration is optional. For that route, create an API key in the CJ account's API settings, then follow CJ's documented access-token flow. Store the key and returned tokens only in a server-side secret manager.
 
 - CJ API key guide: https://developers.cjdropshipping.com/en/api/start/apikey.html
 - CJ API development flow: https://developers.cjdropshipping.com/en/api/start/development.html
 - CJ API authentication: https://developers.cjdropshipping.com/en/api/api2/api/auth.html
 
-The admin page reports whether the optional `CJ_API_KEY` environment variable is configured, but that is not an API connectivity test. Syncee and DSers status must be verified inside their respective apps after OAuth completes.
+A configured supplier secret is not proof of a working connection. Supplier purchases, subscriptions, imports, stock changes and supplier order submission remain disabled until separately tested and approved.
 
-## Important safety boundaries
+## Hostname routing
 
-- Supplier product search/import is not run automatically.
-- Product imports require explicit product-level approval.
-- Paid supplier plans, supplier purchases, live inventory updates, order submission and fulfilment automation remain disabled.
-- Do not expose supplier credentials through client components, API responses, logs, or `NEXT_PUBLIC_*` variables.
-- The admin page is currently a development preview, not an authenticated production admin boundary.
-- Shopify Admin API operations require a separately authenticated and authorised server-side app. Do not reuse a Storefront API token as an Admin API token.
+Application middleware recognises the planned customer hosts `shopvendrahub.com` and `www.shopvendrahub.com`, and the admin host `admin.shopvendrahub.com`, while retaining the previous VendraHub hostnames for compatibility. This is application routing only; it does not change registrar nameservers, DNS records, Cloudflare routes or production deployment.
 
-## Routes
+## Local development and verification
 
-- `/` — VendraHub landing page
-- `/admin` — admin workspace preview (not production-authenticated)
-- `/customer` — read-only Shopify product storefront
-- `/api/products` — server-side Shopify product search (`q` optional, `limit` capped at 20)
+```bash
+cp .env.example .env.local
+npm install
+npx tsc --noEmit
+npm run build
+npm run dev
+```
+
+The GitHub Actions workflow `.github/workflows/build.yml` runs the vinext compatibility check, TypeScript verification and Next.js production build on pushes and pull requests. A successful build does not replace authenticated customer/admin acceptance testing against the connected Shopify and Supabase services.
 
 ## Android packaging
 
