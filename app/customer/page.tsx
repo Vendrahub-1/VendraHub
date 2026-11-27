@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import CheckoutButton from '@/components/storefront/checkout-button';
 import AddToCartButton from '@/components/storefront/add-to-cart-button';
+import WishlistButton from '@/components/storefront/wishlist-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
 import CustomerSidebar from '@/components/storefront/customer-sidebar';
 import CustomerHomeNotifications from '@/components/storefront/customer-home-notifications';
@@ -65,7 +66,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
                 ) : <div className="vh-product-no-image" aria-hidden="true">VH</div>}
                 <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available' : 'Sold out'}</span>
               </div>
-              <div className="vh-product-info"><h3><Link href={`/customer/products/${product.handle}`}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={`/customer/products/${product.handle}`}>View details →</Link><AddToCartButton product={product} available={product.availableForSale} /><CheckoutButton variantId={product.variantId} available={product.availableForSale} /></div>
+              <div className="vh-product-info"><h3><Link href={`/customer/products/${product.handle}`}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={`/customer/products/${product.handle}`}>View details →</Link><WishlistButton productId={product.id} compact /><AddToCartButton product={product} available={product.availableForSale} /><CheckoutButton variantId={product.variantId} available={product.availableForSale} /></div>
             </article>
           ))}
         </div>
