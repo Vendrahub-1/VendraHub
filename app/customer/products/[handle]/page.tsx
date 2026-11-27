@@ -33,8 +33,8 @@ export default async function CustomerProductDetail({ params }: { params: Promis
           <h1>{product.title}</h1>
           <p>{product.description || 'A considered pick from the VendraHub fashion and lifestyle collection.'}</p>
           <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available to purchase' : 'Currently sold out'}</span>
-          <ProductPurchasePanel product={product} />
-          <p className="vh-product-detail-note">Secure payment is completed through Shopify checkout.</p>
+          <ProductPurchasePanel product={product} checkoutEnabled={process.env.NEXT_PUBLIC_CHECKOUT_ENABLED === 'true'} />
+          <p className="vh-product-detail-note">Payment checkout is paused while we finish testing the VendraHub platform.</p>
           <Link href="/customer/categories" className="vh-back-link">← Continue browsing</Link>
         </div>
       </section>
