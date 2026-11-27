@@ -111,3 +111,6 @@ Implemented on `feat/frontend-95-readiness` after the initial audit:
 - Carrier scans and delivery estimates depend on fulfilment providers supplying tracking data to Shopify.
 - No Supabase schema, RLS policy, live Shopify configuration, production deployment, DNS, or production data was changed.
 - Automated build verification is required for the latest branch head; live authenticated checkout/order tests remain pending.
+
+- Order filters use Shopify's actual cancellation timestamp and fulfilment enums rather than assuming a made-up `CANCELLED` fulfilment state.
+- Shopify Admin API access to historical orders is subject to the store's granted scopes; without Shopify's `read_all_orders` approval, Shopify's default order visibility may be limited to the most recent 60 days.
