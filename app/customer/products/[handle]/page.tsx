@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import ProductPurchasePanel from '@/components/storefront/product-purchase-panel';
 import WishlistButton from '@/components/storefront/wishlist-button';
 import CustomerBottomNav from '@/components/storefront/customer-bottom-nav';
-import { searchShopifyProducts, ShopifyConfigurationError } from '@/lib/shopify';
+import { getShopifyProductByHandle, ShopifyConfigurationError } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +12,7 @@ export default async function CustomerProductDetail({ params }: { params: Promis
   const { handle } = await params;
   let product = null;
   try {
-    const products = await searchShopifyProducts('', 20);
-    product = products.find(item => item.handle === handle) ?? null;
+    product = await getShopifyProductByHandle(handle);
   } catch (error) {
     if (!(error instanceof ShopifyConfigurationError)) console.error('Product detail lookup failed:', error);
   }
