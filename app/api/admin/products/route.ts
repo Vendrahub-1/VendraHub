@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
   const search = (request.nextUrl.searchParams.get('q') ?? '').trim().slice(0, 100);
   const status = request.nextUrl.searchParams.get('status') ?? 'ALL';
   const after = request.nextUrl.searchParams.get('after');
-  const queryParts = [];
+  const queryParts: string[] = [];
   if (status === 'ACTIVE' || status === 'DRAFT' || status === 'ARCHIVED') queryParts.push(`status:${status.toLowerCase()}`);
   if (search) queryParts.push(`title:* ${search.replace(/[\\:"()]/g, ' ')} *`);
   try {
