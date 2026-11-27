@@ -51,7 +51,7 @@ export default async function AdminPage() {
         <div className="admin-content">
           <section id="overview" className="admin-welcome"><div><p className="admin-kicker">MORE CHOICE. BETTER LIVING.</p><h1>Good day. <span>Here is your store overview.</span></h1><p>Your administration workspace. Live business figures will appear when authenticated data services are connected.</p></div><div className="welcome-date">VENDRAHUB<br/><strong>ADMINISTRATION</strong></div></section>
 
-          <div className="admin-alert"><span className="alert-icon">!</span><div><strong>Protected owner workspace — operational integrations remain read-only</strong><p>Only the verified owner session with authenticator-based MFA can access this console. Supplier purchases, imports, live inventory changes, payments and fulfilment actions remain disabled.</p></div></div>
+          <div className="admin-note"><strong>Security status: owner access protected</strong><p>Your admin console is protected by verified owner sign-in and authenticator-based MFA. Supplier purchases, product imports, live inventory changes, payments and fulfilment remain safely paused until each integration is connected, verified and separately approved.</p></div>
 
           <nav className="admin-quick-actions" aria-label="Quick management links">
             <a href="#products"><span>01</span><strong>Products</strong><small>Catalogue & pricing</small><b aria-hidden="true">↗</b></a>
