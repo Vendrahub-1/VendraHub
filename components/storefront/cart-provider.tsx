@@ -92,6 +92,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   function clearCart() {
     setItems([]);
+    try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* Storage may be unavailable. */ }
   }
 
   const value = useMemo(() => ({ items, ready, addItem, updateQuantity, removeItem, clearCart }), [items, ready]);
