@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { CartProvider } from '@/components/storefront/cart-provider';
+import { WishlistProvider } from '@/components/storefront/wishlist-provider';
 
 export const metadata: Metadata = {
   title: 'VendraHub',
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body><CartProvider>{children}</CartProvider></body>
+      <body><WishlistProvider><CartProvider>{children}</CartProvider></WishlistProvider></body>
     </html>
   );
 }
