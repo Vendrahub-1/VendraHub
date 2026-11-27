@@ -37,10 +37,10 @@ jobs:
       - name: Initialize isolated Cloudflare preview build
         env:
           CF_WORKER_NAME: vendrahub
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUSTOMER_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          test -n "$CLOUDFLARE_API_TOKEN" || (echo "::error::Missing CLOUDFLARE_API_TOKEN repository secret" && exit 1)
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "::error::Missing CLOUDFLARE_CUSTOMER_API_TOKEN repository secret" && exit 1)
           test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "::error::Missing CLOUDFLARE_ACCOUNT_ID repository secret" && exit 1)
           npx --yes vinext init --platform=cloudflare --name=vendrahub --cdn-cache=none --data-cache=none --image-optimization=none --no-prerender --force
           node scripts/prepare-cloudflare-vinext.mjs
@@ -52,7 +52,7 @@ jobs:
         id: deploy
         env:
           CF_WORKER_NAME: vendrahub
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUSTOMER_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -o pipefail
