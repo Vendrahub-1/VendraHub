@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import AdminWorkspace from '@/components/admin/admin-workspace';
+import ProductsManager from '@/components/admin/products-manager';
+import OperationsManager from '@/components/admin/operations-manager';
+import AiOperationsAssistant from '@/components/admin/ai-operations-assistant';
 import { createClient } from '@/lib/supabase/server';
 
 type Row = Record<string, string | number | null>;
@@ -46,7 +49,7 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
   let rows: Row[] = [];
   let count = 0;
   let errorMessage = '';
-  if (config.table) {
+  if (config.table && !['products', 'orders', 'customers', 'inventory', 'support'].includes(section)) {
     const countResult = await supabase.from(config.table).select('*', { count: 'exact', head: true });
     count = countResult.count ?? 0;
     const columns = (config.columns ?? []).map(column => column.key).join(',');
@@ -61,18 +64,12 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
         <div><p className="admin-kicker">MANAGEMENT / {section.toUpperCase()}</p><h1>{config.title}</h1><p>{config.description}</p></div>
         <span className="preview-chip">SECURE OWNER VIEW</span>
       </section>
-      {section === 'assistant' ? (
-        <div className="admin-ai-layout">
-          <article className="admin-card admin-ai-panel">
-            <div className="admin-ai-mark">✦</div>
-            <p className="admin-kicker">VENDRAHUB INTELLIGENCE</p>
-            <h2>Your operations copilot</h2>
-            <p>The assistant workspace is ready for its model connection. It will use approved marketplace data and prepare recommendations for review.</p>
-            <div className="admin-ai-prompts"><span>Summarise store performance</span><span>Find low-stock products</span><span>Compare supplier options</span><span>Draft a product description</span></div>
-            <div className="admin-ai-input"><span>Ask VendraHub AI about your store…</span><button type="button" disabled>Connect AI service first</button></div>
-          </article>
-          <aside className="admin-card"><h3>Approval controls</h3><ul className="feature-list"><li>AI can analyse and draft.</li><li>Owner approves every consequential action.</li><li>No autonomous purchases or supplier orders.</li><li>No automatic refunds or inventory writes.</li></ul></aside>
-        </div>
+      {section === 'products' ? (
+        <ProductsManager />
+      ) : ['orders', 'customers', 'inventory', 'support'].includes(section) ? (
+        <OperationsManager section={section as 'orders' | 'customers' | 'inventory' | 'support'} />
+      ) : section === 'assistant' ? (
+        <AiOperationsAssistant />
       ) : section === 'settings' ? (
         <div className="settings-grid">
           <article className="admin-card"><h3>Marketplace identity</h3><p>Business model</p><strong>Fashion & lifestyle ecommerce marketplace</strong><p>Store currency</p><strong>NGN · verify against Shopify settings</strong><p>Shopify store</p><strong>vendrahub-store.myshopify.com</strong></article>
