@@ -40,6 +40,10 @@ const ADD_MEDIA = `
   }
  }`;
 const PUBLISH_QUERY = `query VendraHubPublications { publications(first: 20) { nodes { id name } } }`;
+const ACTIVATE_MUTATION = `
+ mutation VendraHubActivateProduct($product: ProductUpdateInput!) {
+  productUpdate(product: $product) { product { id status } userErrors { field message } }
+ }`;
 const PUBLISH_MUTATION = `
  mutation VendraHubPublishProduct($id: ID!, $input: [PublicationInput!]!) {
   publishablePublish(id: $id, input: $input) { userErrors { field message } }
@@ -99,6 +103,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const publications = await shopifyAdminGraphql<{ publications: { nodes: Array<{ id: string; name: string }> } }>(PUBLISH_QUERY);
   const publication = publications.publications.nodes.find(item => /online store/i.test(item.name)) ?? publications.publications.nodes.find(item => /online/i.test(item.name));
   if (!publication) return json({ error: 'The Shopify Online Store sales channel publication was not found. Connect the Online Store channel first.' }, 409);
+  if (action === 'publish') {
+   const activated = await shopifyAdminGraphql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(ACTIVATE_MUTATION, { product: { id, status: 'ACTIVE' } });
+   if (activated.productUpdate.userErrors.length) return json({ error: activated.productUpdate.userErrors.map(item => item.message).join(' ') }, 422);
+  }
   const mutation = action === 'publish' ? PUBLISH_MUTATION : UNPUBLISH_MUTATION;
   const key = action === 'publish' ? 'publishablePublish' : 'publishableUnpublish';
   const result = await shopifyAdminGraphql<Record<string, { userErrors: Array<{ message: string }> }>>(mutation, { id, input: [{ publicationId: publication.id }] });
