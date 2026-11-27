@@ -96,10 +96,10 @@ const VARIANT_UPDATE = `
   }
  }`;
 const ADD_MEDIA = `
- mutation VendraHubAddProductImage($productId: ID!, $media: [CreateMediaInput!]!) {
-  productCreateMedia(productId: $productId, media: $media) {
-   media { ... on MediaImage { id } }
-   mediaUserErrors { field message }
+ mutation VendraHubAddProductImage($product: ProductUpdateInput!, $media: [CreateMediaInput!]!) {
+  productUpdate(product: $product, media: $media) {
+   product { id }
+   userErrors { field message }
   }
  }`;
 
@@ -124,11 +124,11 @@ export async function POST(request: NextRequest) {
       if (updated.productVariantsBulkUpdate.userErrors.length) return json({ product: result.product, warning: updated.productVariantsBulkUpdate.userErrors.map(item => item.message).join(' '), created: true }, 207);
     }
     if (input.imageUrl) {
-      const media = await shopifyAdminGraphql<{ productCreateMedia: { mediaUserErrors: Array<{ message: string }> } }>(ADD_MEDIA, {
-        productId: result.product.id,
+      const media = await shopifyAdminGraphql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(ADD_MEDIA, {
+        product: { id: result.product.id },
         media: [{ mediaContentType: 'IMAGE', originalSource: input.imageUrl, alt: input.title }],
       });
-      if (media.productCreateMedia.mediaUserErrors.length) console.warn('Product created but image was not added:', media.productCreateMedia.mediaUserErrors);
+      if (media.productUpdate.userErrors.length) console.warn('Product created but image was not added:', media.productUpdate.userErrors);
     }
     await recordAudit(auth.supabase, auth.user.id, 'product.created_draft', result.product.id, { title: input.title });
     return json({ product: result.product, message: 'Product created as a draft. Review it and publish when ready.' }, 201);
