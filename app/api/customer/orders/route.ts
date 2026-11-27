@@ -37,7 +37,7 @@ export async function GET() {
 
   try {
     const email = user.email.trim().toLowerCase();
-    const query = 'email:' + email.replace(/[\\s:"()]/g, '');
+    const query = 'email:' + email.replaceAll(' ', '').replaceAll('"', '').replaceAll(':', '').replaceAll('(', '').replaceAll(')', '');
     const data = await shopifyAdminGraphql<OrdersResponse>(ORDERS_QUERY, { first: 30, query });
     const orders = data.orders.nodes.map(order => ({
       id: order.id, name: order.name, createdAt: order.createdAt,
