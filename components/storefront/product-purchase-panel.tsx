@@ -13,7 +13,7 @@ function formatPrice(amount: string, currency: string) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value);
 }
 
-export default function ProductPurchasePanel({ product }: { product: Product }) {
+export default function ProductPurchasePanel({ product, checkoutEnabled = false }: { product: Product; checkoutEnabled?: boolean }) {
   const { addItem } = useVendraCart();
   const variants = product.variants ?? [];
   const [selectedId, setSelectedId] = useState(product.variantId ?? variants[0]?.id ?? '');
@@ -25,7 +25,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
   const currency = selected?.currencyCode ?? product.currencyCode;
 
   function add() {
-    if (!selectedId || !available) return;
+    if (!checkoutEnabled || !selectedId || !available) return;
     addItem({ variantId: selectedId, productId: product.id, handle: product.handle, title: product.title + (selected?.title && selected.title !== 'Default Title' ? ' — ' + selected.title : ''), imageUrl: product.imageUrl, price, currencyCode: currency }, quantity);
     setNotice('Added to your shopping bag.');
   }
@@ -55,7 +55,7 @@ export default function ProductPurchasePanel({ product }: { product: Product }) 
     </label>
     <div className="vh-product-action-row">
       <button type="button" className="vh-button vh-button-dark" onClick={add} disabled={!available || !selectedId}>Add to bag</button>
-      <button type="button" className="vh-button vh-button-outline" onClick={buyNow} disabled={!available || !selectedId}>Buy now</button>
+      <button type="button" className="vh-button vh-button-outline" onClick={buyNow} disabled={!checkoutEnabled || !available || !selectedId}>{checkoutEnabled ? 'Buy now' : 'Checkout paused during testing'}</button>
     </div>
     <WishlistButton productId={product.id} />
     {notice && <p className="vh-product-action-feedback" role="status">{notice}</p>}
