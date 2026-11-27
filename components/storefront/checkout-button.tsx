@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 
-export default function CheckoutButton({ variantId, available }: { variantId: string | null; available: boolean }) {
+export default function CheckoutButton({ variantId, available, checkoutEnabled = false }: { variantId: string | null; available: boolean; checkoutEnabled?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   async function checkout() {
-    if (!variantId || !available || busy) return;
+    if (!checkoutEnabled || !variantId || !available || busy) return;
     setBusy(true);
     setError('');
     try {
@@ -34,8 +34,8 @@ export default function CheckoutButton({ variantId, available }: { variantId: st
 
   return (
     <div className="store-checkout">
-      <button type="button" onClick={checkout} disabled={!variantId || !available || busy}>
-        {busy ? 'Opening secure checkout…' : available ? 'Buy now' : 'Sold out'}
+      <button type="button" onClick={checkout} disabled={!checkoutEnabled || !variantId || !available || busy}>
+        {busy ? 'Opening secure checkout…' : !checkoutEnabled ? 'Checkout paused during testing' : available ? 'Buy now' : 'Sold out'}
       </button>
       {error && <small role="alert">{error}</small>}
     </div>
