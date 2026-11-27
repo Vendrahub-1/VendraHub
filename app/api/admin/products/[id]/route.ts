@@ -33,10 +33,10 @@ const UPDATE_VARIANT = `
   }
  }`;
 const ADD_MEDIA = `
- mutation VendraHubAddProductImage($productId: ID!, $media: [CreateMediaInput!]!) {
-  productCreateMedia(productId: $productId, media: $media) {
-   media { ... on MediaImage { id } }
-   mediaUserErrors { field message }
+ mutation VendraHubAddProductImage($product: ProductUpdateInput!, $media: [CreateMediaInput!]!) {
+  productUpdate(product: $product, media: $media) {
+   product { id }
+   userErrors { field message }
   }
  }`;
 const PUBLISH_QUERY = `query VendraHubPublications { publications(first: 20) { nodes { id name } } }`;
@@ -77,8 +77,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
    if (variantUpdate.productVariantsBulkUpdate.userErrors.length) return json({ product: updated.productUpdate.product, warning: variantUpdate.productVariantsBulkUpdate.userErrors.map(item => item.message).join(' ') }, 207);
   }
   if (imageUrl) {
-   const media = await shopifyAdminGraphql<{ productCreateMedia: { mediaUserErrors: Array<{ message: string }> } }>(ADD_MEDIA, { productId: id, media: [{ mediaContentType: 'IMAGE', originalSource: imageUrl, alt: title }] });
-   if (media.productCreateMedia.mediaUserErrors.length) console.warn('Product saved but image could not be added:', media.productCreateMedia.mediaUserErrors);
+   const media = await shopifyAdminGraphql<{ productUpdate: { userErrors: Array<{ message: string }> } }>(ADD_MEDIA, { product: { id }, media: [{ mediaContentType: 'IMAGE', originalSource: imageUrl, alt: title }] });
+   if (media.productUpdate.userErrors.length) console.warn('Product saved but image could not be added:', media.productUpdate.userErrors);
   }
   await auth.supabase.from('audit_events').insert({ actor_id: auth.user.id, action: 'product.updated', resource_type: 'shopify_product', resource_id: id, outcome: 'success', details: { title } });
   return json({ product: updated.productUpdate.product, message: 'Product changes saved.' });
