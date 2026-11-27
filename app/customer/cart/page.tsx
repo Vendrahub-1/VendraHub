@@ -18,12 +18,13 @@ export default function CustomerCartPage() {
   const { items, ready, updateQuantity, removeItem, clearCart } = useVendraCart();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const checkoutEnabled = process.env.NEXT_PUBLIC_CHECKOUT_ENABLED === 'true';
   const currency = items[0]?.currencyCode ?? 'NGN';
   const mixedCurrencies = items.some(item => item.currencyCode !== currency);
   const subtotal = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 
   async function checkout() {
-    if (!items.length || busy || mixedCurrencies) return;
+    if (!checkoutEnabled || !items.length || busy || mixedCurrencies) return;
     setBusy(true);
     setError('');
     try {
@@ -57,7 +58,7 @@ export default function CustomerCartPage() {
       <section className="vh-secondary-hero vh-cart-hero">
         <p className="vh-overline">YOUR SELECTION</p>
         <h1>Your shopping<br/><em>bag.</em></h1>
-        <p>Your selected products stay in this browser while you continue shopping. Secure payment and final delivery charges are handled by Shopify checkout.</p>
+        <p>Your selected products stay in this browser while you continue shopping. Checkout is paused until the platform and payment flow have been tested.</p>
       </section>
       {!ready ? <div className="vh-store-message" role="status">Loading your shopping bag…</div> : items.length === 0 ? (
         <section className="vh-cart-next">
@@ -87,9 +88,9 @@ export default function CustomerCartPage() {
           </div>
           <aside className="vh-cart-summary">
             <h2>Order summary</h2>
-            {mixedCurrencies ? <p>Items use different currencies. Please review the products before checkout.</p> : <><div><span>Subtotal</span><strong>{money(subtotal, currency)}</strong></div><p>Shipping, taxes and any applicable duties are calculated by Shopify at checkout.</p></>}
+            {mixedCurrencies ? <p>Items use different currencies. Please review the products before checkout.</p> : <><div><span>Subtotal</span><strong>{money(subtotal, currency)}</strong></div><p>Shipping, taxes and duties will be calculated when checkout is enabled. This subtotal is a cart estimate.</p></>}
             {error && <p role="alert" className="vh-store-message">{error}</p>}
-            <button type="button" className="vh-button vh-button-dark" onClick={checkout} disabled={busy || mixedCurrencies}>{busy ? 'Opening secure checkout…' : 'Continue to secure checkout'}</button>
+            <button type="button" className="vh-button vh-button-dark" onClick={checkout} disabled={!checkoutEnabled || busy || mixedCurrencies}>{busy ? 'Opening secure checkout…' : checkoutEnabled ? 'Continue to secure checkout' : 'Checkout paused during testing'}</button>
             <button type="button" className="vh-cart-clear" onClick={clearCart} disabled={busy}>Clear shopping bag</button>
             <Link href="/customer/categories" className="vh-back-link">← Continue shopping</Link>
           </aside>
