@@ -97,3 +97,90 @@ export async function searchShopifyProducts(search = '', limit = 20): Promise<St
   const adminPayload = (await adminResponse.json()) as { products?: StorefrontProduct[] };
   return adminPayload.products ?? [];
 }
+
+
+type ShopifyProductByHandleResponse = {
+  data?: {
+    product?: {
+      id: string; title: string; handle: string; description: string; availableForSale: boolean;
+      featuredImage: { url: string; altText: string | null } | null;
+      priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+      variants: { nodes: Array<{ id: string; title: string; availableForSale: boolean; price: { amount: string; currencyCode: string }; selectedOptions: Array<{ name: string; value: string }> }> };
+    } | null;
+  };
+  errors?: Array<{ message?: string }>;
+};
+
+const PRODUCT_BY_HANDLE_QUERY = `
+  query VendraHubProductByHandle($handle: String!) {
+    product(handle: $handle) {
+      id title handle description availableForSale
+      featuredImage { url altText }
+      priceRange { minVariantPrice { amount currencyCode } }
+      variants(first: 100) {
+        nodes { id title availableForSale price { amount currencyCode } selectedOptions { name value } }
+      }
+    }
+  }
+`;
+
+export async function getShopifyProductByHandle(handle: string): Promise<StorefrontProduct | null> {
+  const safeHandle = handle.trim().slice(0, 255);
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(safeHandle)) return null;
+  if (SHOPIFY_TOKEN_CANDIDATES.length === 0) throw new ShopifyConfigurationError();
+
+  const endpoint = `https://${SHOPIFY_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
+  let lastAuthStatus: number | null = null;
+
+  for (const candidate of SHOPIFY_TOKEN_CANDIDATES) {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', [candidate.header]: candidate.token },
+      body: JSON.stringify({ query: PRODUCT_BY_HANDLE_QUERY, variables: { handle: safeHandle } }),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (response.status === 401 || response.status === 403) {
+      lastAuthStatus = response.status;
+      continue;
+    }
+    if (!response.ok) throw new Error(`Shopify product lookup failed (${response.status}).`);
+
+    const payload = await response.json() as ShopifyProductByHandleResponse;
+    if (payload.errors?.length) {
+      if (payload.errors.some(item => /access denied|unauthorized|forbidden/i.test(item.message ?? ''))) {
+        lastAuthStatus = 403;
+        continue;
+      }
+      throw new Error('Shopify returned a product lookup error.');
+    }
+    if (!payload.data || !('product' in payload.data)) throw new Error('Shopify returned an incomplete product response.');
+    const product = payload.data.product;
+    if (!product) return null;
+
+    const variants = product.variants.nodes.map(variant => ({
+      id: variant.id,
+      title: variant.title,
+      availableForSale: variant.availableForSale,
+      price: variant.price.amount,
+      currencyCode: variant.price.currencyCode,
+      selectedOptions: variant.selectedOptions,
+    }));
+    const firstAvailable = variants.find(variant => variant.availableForSale) ?? variants[0];
+    return {
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
+      description: product.description,
+      availableForSale: product.availableForSale,
+      imageUrl: product.featuredImage?.url ?? null,
+      imageAlt: product.featuredImage?.altText ?? null,
+      price: firstAvailable?.price ?? product.priceRange.minVariantPrice.amount,
+      currencyCode: firstAvailable?.currencyCode ?? product.priceRange.minVariantPrice.currencyCode,
+      variantId: firstAvailable?.id ?? null,
+      variants,
+    };
+  }
+
+  throw new Error(`Shopify rejected all configured Storefront API tokens (${lastAuthStatus ?? 'unknown'}).`);
+}
