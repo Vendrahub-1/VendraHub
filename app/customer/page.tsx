@@ -29,6 +29,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
     }
     return [];
   });
+  const checkoutEnabled = process.env.NEXT_PUBLIC_CHECKOUT_ENABLED === 'true';
   const shopifyReady = Boolean(
     process.env.SHOPIFY_STOREFRONT_PUBLIC_TOKEN ||
     process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN ||
@@ -66,7 +67,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
                 ) : <div className="vh-product-no-image" aria-hidden="true">VH</div>}
                 <span className={product.availableForSale ? 'vh-stock vh-in-stock' : 'vh-stock'}>{product.availableForSale ? 'Available' : 'Sold out'}</span>
               </div>
-              <div className="vh-product-info"><h3><Link href={`/customer/products/${product.handle}`}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={`/customer/products/${product.handle}`}>View details →</Link><WishlistButton productId={product.id} compact /><AddToCartButton product={product} available={product.availableForSale} /><CheckoutButton variantId={product.variantId} available={product.availableForSale} /></div>
+              <div className="vh-product-info"><h3><Link href={`/customer/products/${product.handle}`}>{product.title}</Link></h3><p>{product.description || 'A VendraHub collection pick.'}</p><strong>{formatPrice(product.price, product.currencyCode)}</strong><Link className="vh-product-details-link" href={`/customer/products/${product.handle}`}>View details →</Link><WishlistButton productId={product.id} compact /><AddToCartButton product={product} available={product.availableForSale} /><CheckoutButton variantId={product.variantId} available={product.availableForSale} checkoutEnabled={checkoutEnabled} /></div>
             </article>
           ))}
         </div>
@@ -87,7 +88,7 @@ export default async function CustomerPage({ searchParams }: CustomerPageProps) 
         </div>
       </section>
 
-      <footer className="vh-store-footer"><Link href="/">VendraHub</Link><span>Secure checkout powered by Shopify</span><Link href="/customer/account">Your account →</Link></footer>
+      <footer className="vh-store-footer"><Link href="/">VendraHub</Link><span>Checkout will open after platform testing is complete</span><Link href="/customer/account">Your account →</Link></footer>
       <CustomerBottomNav active="Home" />
     </main>
   );
